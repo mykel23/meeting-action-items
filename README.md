@@ -16,7 +16,9 @@ I'm a project manager. After most meetings, the hardest part isn't the meeting i
 
 ## Try it
 
-1. Download `index.html` and open it in any browser. No install needed.
+**Live demo: [mykel23.github.io/meeting-action-items](https://mykel23.github.io/meeting-action-items/)**
+
+1. Open the live demo, or download `index.html` and open it in any browser. No install needed.
 2. Click **See demo result** to view a sample output without an API key.
 3. To run it on your own notes, paste a Claude API key (get one at [console.anthropic.com](https://console.anthropic.com)), paste your notes, and click **Extract action items**.
 
