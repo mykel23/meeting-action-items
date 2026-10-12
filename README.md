@@ -6,8 +6,11 @@ A small web tool that turns messy meeting notes into a clean list of **who is do
 
 I'm a project manager. After most meetings, the hardest part isn't the meeting itself. It's making sure every task has an owner and a deadline, and that nothing said in passing gets lost. Small teams and nonprofits often don't have a dedicated coordinator to do this, so I built a tool that does the first pass in seconds.
 
+![Screenshot: the tool set up for a health clinic, showing extracted action items](screenshot.png)
+
 ## What it does
 
+- **Tailors itself to your organization.** A 30-second setup survey asks for your organization's name and type (food bank, housing, health clinic, youth program, legal aid, workforce, or general), the kind of meetings you run, and what to watch most closely. The page title, wording, sample notes and Claude's priorities all adjust to fit.
 - Writes a 2–3 sentence summary of the meeting
 - Pulls out every action item with its **owner**, **due date** and **priority**
 - Flags tasks that nobody claimed as **Unassigned** instead of guessing an owner
@@ -30,6 +33,13 @@ Your key stays in the browser tab and is never saved. Notes are sent directly to
 - Calls the Claude Messages API with a system prompt that asks for structured JSON
 - The prompt includes rules that keep results trustworthy: never invent an owner, keep due dates as written, and treat safety or blocking issues as high priority
 - The JSON is rendered into a table and lists, then can be exported
+
+## How the tailoring works
+
+- Each organization type has its own guidance that goes into Claude's instructions. For example, a food bank's fridge temperature problem is flagged high priority, and a legal aid clinic's filing deadline is never dropped.
+- The areas a team checks in setup (deadlines, safety, client follow-ups, staffing, budget) tell Claude what it must not miss.
+- The setup is remembered in that browser. **Copy tailored link** creates a link (for example `?type=legal&org=Houston+Legal+Aid`) that a whole team can open to skip setup.
+- For organizations that handle sensitive client information, the page reminds staff to use initials instead of full names or health details.
 
 ## Design choices
 
