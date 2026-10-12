@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting Notes to Action Items</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1c1a; --muted: #6b6860;
+    --line: #e2dfd6; --accent: #c2410c; --accent-ink: #ffffff;
+    --high: #b91c1c; --med: #b45309; --low: #047857; --soft: #fbfaf7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161513; --panel: #1f1e1b; --ink: #ecebe6; --muted: #a29f96;
+      --line: #34322d; --accent: #f97316; --accent-ink: #1a1208;
+      --high: #f87171; --med: #fbbf24; --low: #34d399; --soft: #24231f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { margin: 0 0 4px; font-size: 1.75rem; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px; margin-top: 20px;
+  }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  .hint { color: var(--muted); font-size: 0.875rem; font-weight: 400; }
+  input[type=password], textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--soft); color: var(--ink); font: inherit;
+  }
+  textarea { min-height: 240px; resize: vertical; font-size: 0.95rem; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  button {
+    font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  .status { color: var(--muted); font-size: 0.9rem; }
+  .error { color: var(--high); }
+  h2 { font-size: 1.15rem; margin: 0 0 10px; }
+  .summary { margin: 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .pill { display: inline-block; font-size: 0.78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+  .p-high { color: var(--high); } .p-medium { color: var(--med); } .p-low { color: var(--low); }
+  .unassigned { color: var(--muted); font-style: italic; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  ul.clean { margin: 0; padding-left: 20px; }
+  .badge { font-size: 0.75rem; color: var(--muted); border: 1px dashed var(--line); padding: 2px 8px; border-radius: 6px; }
+  footer { margin-top: 28px; color: var(--muted); font-size: 0.85rem; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Meeting Notes → Action Items</h1>
+    <p>Paste messy meeting notes. Claude pulls out who's doing what, by when, plus decisions and open questions.</p>
+  </header>
+
+  <section class="panel">
+    <label for="key">Claude API key <span class="hint">— stays in this browser tab only, never saved</span></label>
+    <input id="key" type="password" placeholder="sk-ant-..." autocomplete="off">
+
+    <label for="notes" style="margin-top:16px">Meeting notes</label>
+    <textarea id="notes" placeholder="Paste your meeting notes here..."></textarea>
+
+    <div class="row">
+      <button class="primary" id="run">Extract action items</button>
+      <button id="sample">Load sample notes</button>
+      <button id="demo">See demo result (no key needed)</button>
+      <span class="status" id="status"></span>
+    </div>
+  </section>
+
+  <section class="panel" id="results" hidden>
+    <div class="row" style="margin-top:0; justify-content:space-between">
+      <h2 style="margin:0">Summary <span class="badge" id="demoBadge" hidden>demo output</span></h2>
+      <div class="row" style="margin-top:0">
+        <button id="copyMd">Copy as Markdown</button>
+        <button id="csv">Download CSV</button>
+      </div>
+    </div>
+    <p class="summary" id="summary" style="margin-top:10px"></p>
+
+    <h2 style="margin-top:22px">Action items</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Task</th><th>Owner</th><th>Due</th><th>Priority</th></tr></thead>
+        <tbody id="items"></tbody>
+      </table>
+    </div>
+
+    <div class="cols" style="margin-top:22px">
+      <div><h2>Decisions made</h2><ul class="clean" id="decisions"></ul></div>
+      <div><h2>Open questions</h2><ul class="clean" id="questions"></ul></div>
+    </div>
+  </section>
+
+  <footer>Built with the Claude API. Your notes go straight from your browser to Anthropic's API; nothing is stored.</footer>
+</div>
+
+<script>
+const MODEL = "claude-sonnet-5-5";
+
+const SAMPLE_NOTES = `Food bank volunteer coordination - Tues
+Attendees: Dana (ops lead), Marcus, Priya, Leo
+
+- Saturday distribution moved from 9am to 10am because the church lot isn't open till 9:30. Everyone agreed.
+- Dana: we're short ~6 volunteers for Sat. Priya said she'd post on the community FB group and email the high school volunteer club by Thursday.
+- Cold storage: the walk-in fridge was reading 44F last Friday. Marcus to call the repair company tomorrow and log temps twice a day until fixed. This is urgent - can't take the dairy donation otherwise.
+- Leo wants to try a text reminder for clients the day before pickup. Not decided - need to check if we have consent to text people. Dana will ask the board.
+- Grant report for the county is due the 30th. Someone needs to pull the monthly household numbers. (nobody took it)
+- Next meeting next Tues same time.`;
+
+const DEMO_RESULT = {
+  summary: "The team moved Saturday's distribution to 10am, flagged a volunteer shortage and an urgent walk-in fridge temperature problem, and raised a client text-reminder idea that needs board input on consent.",
+  action_items: [
+    { task: "Call the repair company about the walk-in fridge reading 44°F", owner: "Marcus", due: "Tomorrow", priority: "high" },
+    { task: "Log walk-in fridge temperatures twice daily until repaired", owner: "Marcus", due: "Ongoing until fixed", priority: "high" },
+    { task: "Post volunteer call on community Facebook group and email high school volunteer club (need ~6 for Saturday)", owner: "Priya", due: "Thursday", priority: "high" },
+    { task: "Ask the board whether clients have consented to text messages", owner: "Dana", due: "Before next meeting", priority: "medium" },
+    { task: "Pull monthly household numbers for the county grant report", owner: null, due: "Before the 30th", priority: "medium" }
+  ],
+  decisions: [
+    "Saturday distribution moves from 9am to 10am (church lot opens at 9:30).",
+    "Next meeting is next Tuesday at the same time."
+  ],
+  open_questions: [
+    "Do we have client consent to send text reminders?",
+    "Who owns the county grant report data pull?",
+    "Can the dairy donation be accepted if the fridge isn't fixed in time?"
+  ]
+};
+
+const SYSTEM_PROMPT = `You turn raw meeting notes into a clear, structured record.
+Return ONLY a JSON object, no prose and no code fences, with exactly these keys:
+{
+  "summary": string (2-3 sentences, plain language),
+  "action_items": [ { "task": string, "owner": string or null, "due": string or null, "priority": "high" | "medium" | "low" } ],
+  "decisions": [ string ],
+  "open_questions": [ string ]
+}
+Rules:
+- Only include tasks that someone needs to do after the meeting. Write each task as a clear, specific instruction.
+- Use the owner's name exactly as written in the notes. If nobody took the task, owner is null. Never guess an owner.
+- Keep due dates as written ("Thursday", "the 30th"). If none was given, due is null.
+- Priority: high = urgent, safety, or blocks other work; low = nice to have; otherwise medium.
+- Decisions are things the group agreed on. Open questions are unresolved items, including tasks with no owner.
+- If the notes contain no action items, return an empty array.`;
+
+const $ = (id) => document.getElementById(id);
+let current = null;
+
+function setStatus(msg, isError = false) {
+  $("status").textContent = msg;
+  $("status").classList.toggle("error", isError);
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function parseJson(text) {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("Claude didn't return JSON. Try again.");
+  return JSON.parse(text.slice(start, end + 1));
+}
+
+function render(data, isDemo) {
+  current = data;
+  $("demoBadge").hidden = !isDemo;
+  $("summary").textContent = data.summary || "";
+
+  const items = data.action_items || [];
+  $("items").innerHTML = items.length
+    ? items.map((it, i) => {
+        const p = ["high", "medium", "low"].includes(it.priority) ? it.priority : "medium";
+        const owner = it.owner ? escapeHtml(it.owner) : '<span class="unassigned">Unassigned</span>';
+        return `<tr>
+          <td>${i + 1}</td>
+          <td>${escapeHtml(it.task)}</td>
+          <td>${owner}</td>
+          <td>${it.due ? escapeHtml(it.due) : '<span class="unassigned">—</span>'}</td>
+          <td><span class="pill p-${p}">${p}</span></td>
+        </tr>`;
+      }).join("")
+    : '<tr><td colspan="5" class="unassigned">No action items found.</td></tr>';
+
+  const list = (arr) => (arr && arr.length)
+    ? arr.map(x => `<li>${escapeHtml(x)}</li>`).join("")
+    : '<li class="unassigned">None</li>';
+  $("decisions").innerHTML = list(data.decisions);
+  $("questions").innerHTML = list(data.open_questions);
+
+  $("results").hidden = false;
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function extract() {
+  const key = $("key").value.trim();
+  const notes = $("notes").value.trim();
+  if (!key) return setStatus("Add your Claude API key first, or try the demo result.", true);
+  if (!notes) return setStatus("Paste some meeting notes first.", true);
+
+  $("run").disabled = true;
+  setStatus("Reading your notes…");
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 2000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: `Meeting notes:\n\n${notes}` }]
+      })
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body?.error?.message || `API error (${res.status})`);
+    const text = (body.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+    render(parseJson(text), false);
+    setStatus(`Done — ${current.action_items?.length || 0} action items found.`);
+  } catch (err) {
+    setStatus(err.message || "Something went wrong.", true);
+  } finally {
+    $("run").disabled = false;
+  }
+}
+
+function toMarkdown(d) {
+  const lines = ["## Meeting summary", "", d.summary || "", "", "## Action items", "",
+    "| # | Task | Owner | Due | Priority |", "|---|---|---|---|---|"];
+  (d.action_items || []).forEach((it, i) => {
+    const cell = (s) => String(s ?? "").replace(/\|/g, "\\|");
+    lines.push(`| ${i + 1} | ${cell(it.task)} | ${cell(it.owner || "Unassigned")} | ${cell(it.due || "—")} | ${cell(it.priority)} |`);
+  });
+  lines.push("", "## Decisions", "", ...(d.decisions || []).map(x => `- ${x}`));
+  lines.push("", "## Open questions", "", ...(d.open_questions || []).map(x => `- ${x}`));
+  return lines.join("\n");
+}
+
+function toCsv(d) {
+  const q = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
+  const rows = [["#", "Task", "Owner", "Due", "Priority"].map(q).join(",")];
+  (d.action_items || []).forEach((it, i) =>
+    rows.push([i + 1, it.task, it.owner || "Unassigned", it.due || "", it.priority].map(q).join(",")));
+  return rows.join("\n");
+}
+
+$("run").addEventListener("click", extract);
+$("sample").addEventListener("click", () => { $("notes").value = SAMPLE_NOTES; setStatus("Sample notes loaded."); });
+$("demo").addEventListener("click", () => { $("notes").value = SAMPLE_NOTES; render(DEMO_RESULT, true); setStatus("Showing a saved example result."); });
+
+$("copyMd").addEventListener("click", async () => {
+  if (!current) return;
+  try { await navigator.clipboard.writeText(toMarkdown(current)); setStatus("Copied as Markdown."); }
+  catch { setStatus("Couldn't copy — your browser blocked clipboard access.", true); }
+});
+
+$("csv").addEventListener("click", () => {
+  if (!current) return;
+  const blob = new Blob([toCsv(current)], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "action-items.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
