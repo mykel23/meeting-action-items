@@ -59,6 +59,24 @@
   @media (max-width: 700px) { .checks { grid-template-columns: 1fr; } }
   .checks label { font-weight: 400; display: flex; gap: 8px; align-items: center; margin: 0; }
   .field { margin-top: 16px; }
+  .s-done { color: var(--low); } .s-in_progress { color: var(--med); } .s-blocked { color: var(--high); }
+  .s-not_mentioned { color: var(--muted); } .s-overdue { color: var(--accent-ink); background: var(--high); border-color: var(--high); }
+  .due-date { display: block; color: var(--muted); font-size: 0.8rem; }
+  .note { color: var(--muted); font-size: 0.88rem; }
+  .send-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .send-grid { grid-template-columns: 1fr; } }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--soft); }
+  .card h3 { margin: 0 0 4px; font-size: 1rem; }
+  .card p { margin: 0 0 10px; color: var(--muted); font-size: 0.88rem; }
+  .owner-row { display: grid; grid-template-columns: minmax(80px, 1fr) 2fr auto; gap: 8px; align-items: center; margin-top: 8px; }
+  @media (max-width: 520px) { .owner-row { grid-template-columns: 1fr; } }
+  .owner-row input { padding: 7px 10px; }
+  .owner-name { font-weight: 600; }
+  .owner-count { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+  button.small { padding: 6px 12px; font-size: 0.9rem; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .inline-fields { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; align-items: flex-end; }
+  .inline-fields > div { flex: 1 1 220px; }
   footer { margin-top: 28px; color: var(--muted); font-size: 0.85rem; }
   [hidden] { display: none !important; }
 </style>
@@ -121,6 +139,21 @@
       <textarea id="notes"></textarea>
       <div class="notice" id="privacy" hidden></div>
 
+      <div class="inline-fields">
+        <div>
+          <label for="meetingDate">Meeting date</label>
+          <input id="meetingDate" type="date">
+        </div>
+        <div>
+          <label for="prevSelect">Check progress on <span class="hint">— items from an earlier meeting</span></label>
+          <select id="prevSelect"></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <span class="hint" id="historyNote"></span>
+        <button class="link small" id="clearHistory" hidden>Clear saved meetings</button>
+      </div>
+
       <div class="row">
         <button class="primary" id="run">Extract action items</button>
         <button id="sample">Load sample notes</button>
@@ -132,12 +165,19 @@
     <div class="panel" id="results" hidden>
       <div class="row" style="margin-top:0; justify-content:space-between">
         <h2 style="margin:0">Summary <span class="badge" id="demoBadge" hidden>demo output</span></h2>
-        <div class="row" style="margin-top:0">
-          <button id="copyMd">Copy as Markdown</button>
-          <button id="csv">Download CSV</button>
-        </div>
+        <button id="copyMd">Copy recap as Markdown</button>
       </div>
       <p id="summary" style="margin:10px 0 0"></p>
+
+      <div id="followSection" hidden>
+        <h2 style="margin-top:22px">Follow-up from last meeting <span class="hint" id="followFrom"></span></h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Task</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
+            <tbody id="follow"></tbody>
+          </table>
+        </div>
+      </div>
 
       <h2 style="margin-top:22px">Action items</h2>
       <div class="table-wrap">
@@ -150,6 +190,33 @@
       <div class="cols" style="margin-top:22px">
         <div><h2>Decisions made</h2><ul class="clean" id="decisions"></ul></div>
         <div><h2>Open questions</h2><ul class="clean" id="questions"></ul></div>
+      </div>
+    </div>
+
+    <div class="panel" id="sendPanel" hidden>
+      <h2>Send and export</h2>
+      <div class="send-grid">
+        <div class="card">
+          <h3>Email each owner their tasks</h3>
+          <p>Opens a ready-to-send draft in your email app. Email addresses are remembered in this browser only.</p>
+          <div id="owners"></div>
+          <div class="btns" style="margin-top:12px">
+            <button class="small" id="emailAll">Email full recap to everyone</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Send to your task tool</h3>
+          <p>No account connection needed. Pick where your team tracks work.</p>
+          <div class="btns">
+            <button class="small" id="copySheets">Copy for Google Sheets / Excel</button>
+            <button class="small" id="csv">Download CSV</button>
+          </div>
+          <div class="btns" style="margin-top:8px">
+            <button class="small" id="asanaCsv">Download Asana import file</button>
+            <button class="small" id="copyTrello">Copy as Trello cards</button>
+          </div>
+          <p id="exportHelp" style="margin:10px 0 0"></p>
+        </div>
       </div>
     </div>
 
@@ -335,8 +402,43 @@ const FOCUS = {
   budget: "Budget and spending"
 };
 
-/* ---------- Profile storage (browser-only; URL params let you share a tailored link) ---------- */
+/* Demo "last meeting" items for each org type, so the follow-up feature shows in demo mode.
+   due_in = days relative to the demo meeting date (negative = in the past). */
+const DEMO_FOLLOW = {
+  food: [
+    { task: "Confirm the dairy donation pickup window with the grocery partner", owner: "Leo", due_in: -5, status: "done", note: "Pickup set for Friday 8am." },
+    { task: "Order replacement pallet jack", owner: "Dana", due_in: -2, status: "not_mentioned", note: null },
+    { task: "Update the volunteer sign-in sheet", owner: "Priya", due_in: 6, status: "in_progress", note: "Draft is done, needs printing." }
+  ],
+  housing: [
+    { task: "Submit the quarterly occupancy report to the city", owner: "Rosa", due_in: -3, status: "done", note: null },
+    { task: "Schedule pest treatment for the 2nd floor", owner: "James", due_in: -1, status: "blocked", note: "Vendor hasn't confirmed a date." }
+  ],
+  health: [
+    { task: "Restock patient intake forms at front desk", owner: "Omar", due_in: -4, status: "done", note: null },
+    { task: "Send the updated sliding-fee scale to the board", owner: "Beth", due_in: -2, status: "not_mentioned", note: null }
+  ],
+  youth: [
+    { task: "Collect fall enrollment forms from all families", owner: "Lina", due_in: -6, status: "in_progress", note: "8 forms still missing." },
+    { task: "Book the gym for the family night", owner: "Devon", due_in: 4, status: "done", note: null }
+  ],
+  legal: [
+    { task: "Send the Ortiz client their hearing reminder letter", owner: "Raj", due_in: -2, status: "done", note: null },
+    { task: "Update the intake screening script", owner: "Alicia", due_in: -7, status: "not_mentioned", note: null }
+  ],
+  workforce: [
+    { task: "Confirm the forklift trainer for the new cohort", owner: "Keisha", due_in: -3, status: "done", note: null },
+    { task: "Post the cohort flyer at the library and job center", owner: "Luis", due_in: -1, status: "not_mentioned", note: null }
+  ]
+};
+
+/* ---------- Browser storage (wrapped: storage can be blocked in private windows) ---------- */
 const STORE_KEY = "mai-profile-v1";
+const HISTORY_KEY = "mai-history-v1";
+const ROSTER_KEY = "mai-roster-v1";
+function readStore(k, fallback) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fallback; } catch { return fallback; } }
+function writeStore(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+
 function loadProfile() {
   const p = new URLSearchParams(location.search);
   if (p.get("type") && ORG_TYPES[p.get("type")]) {
@@ -347,14 +449,13 @@ function loadProfile() {
       focus: (p.get("focus") || "").split(",").filter(f => FOCUS[f])
     };
   }
-  try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch { return null; }
+  return readStore(STORE_KEY, null);
 }
-function saveProfile(p) { try { localStorage.setItem(STORE_KEY, JSON.stringify(p)); } catch {} }
 
 /* ---------- Helpers ---------- */
 const $ = (id) => document.getElementById(id);
 let profile = null;
-let current = null;
+let current = null;      // { result, meetingDate, follow: [...], isDemo }
 
 function setStatus(msg, isError = false) {
   $("status").textContent = msg;
@@ -364,8 +465,22 @@ function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function cfg() { return ORG_TYPES[profile?.type] || ORG_TYPES.general; }
-function sampleNotes() { return cfg().sample || ORG_TYPES.food.sample; }
-function demoResult() { return cfg().demo || ORG_TYPES.food.demo; }
+function typeKeyForSamples() { return ORG_TYPES[profile?.type]?.sample ? profile.type : "food"; }
+function sampleNotes() { return ORG_TYPES[typeKeyForSamples()].sample; }
+function isoToday() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+function addDays(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function prettyDate(iso) {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+  return new Date(iso + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function weekday(iso) { return new Date(iso + "T12:00:00").toLocaleDateString("en-US", { weekday: "long" }); }
+function meetingName() { return profile.meeting === MEETING_TYPES[5] ? "meeting" : profile.meeting.toLowerCase().replace(/s$/, ""); }
+
+/* Split "Alicia, Raj" or "Kim and Tariq" into separate owners */
+function splitOwners(owner) {
+  if (!owner) return [];
+  return owner.split(/\s*(?:,|&|\band\b|\/)\s*/i).map(s => s.trim()).filter(Boolean);
+}
 
 /* ---------- Setup survey ---------- */
 function buildSetup() {
@@ -393,7 +508,7 @@ function finishSetup(skip) {
         meeting: $("sMeeting").value,
         focus: [...document.querySelectorAll("#sFocus input:checked")].map(cb => cb.value)
       };
-  saveProfile(profile);
+  writeStore(STORE_KEY, profile);
   if (location.search) history.replaceState(null, "", location.pathname);
   applyProfile();
 }
@@ -402,29 +517,56 @@ function finishSetup(skip) {
 function applyProfile() {
   const c = cfg();
   const org = profile.org;
-  const meetingLower = profile.meeting.toLowerCase().replace(/^a mix of meetings$/, "meetings");
+  const singular = profile.meeting === MEETING_TYPES[5] ? "Meeting" : profile.meeting.replace(/s$/, "").replace(/\b\w/g, ch => ch.toUpperCase());
 
   document.title = org ? `${org} · Action Items` : "Meeting Notes to Action Items";
   $("eyebrow").textContent = org ? `${org} · ${c.label}` : (profile.type === "general" ? "Meeting assistant" : c.label);
-  const singular = profile.meeting === MEETING_TYPES[5] ? "Meeting" : profile.meeting.replace(/s$/, "").replace(/\b\w/g, ch => ch.toUpperCase());
   $("title").textContent = profile.type === "general" ? "Meeting Notes → Action Items" : `${singular} Notes → Action Items`;
   $("subtitle").textContent = c.subtitle;
-  $("notesLabel").textContent = `Notes from your ${meetingLower.replace(/s$/, "")}`;
-  $("notes").placeholder = `Paste notes from your ${meetingLower.replace(/s$/, "")} here. Messy is fine: bullet points, half-sentences, names.`;
+  $("notesLabel").textContent = `Notes from your ${meetingName()}`;
+  $("notes").placeholder = `Paste notes from your ${meetingName()} here. Messy is fine: bullet points, half-sentences, names.`;
   $("sample").textContent = c.sample ? `Load sample ${c.label.split(" ")[0].toLowerCase()} notes` : "Load sample notes";
-
   $("privacy").hidden = !c.privacy;
   $("privacy").textContent = "Tip: avoid pasting full client names, case numbers or health details. Initials work fine, and the action items come out just as clear.";
-
   $("footer").textContent = (org ? `Set up for ${org}. ` : "") +
-    "Built with the Claude API. Your notes go straight from your browser to Anthropic's API; nothing is stored.";
+    "Built with the Claude API. Your notes go straight from your browser to Anthropic's API. Results you save stay in this browser.";
 
-  $("results").hidden = true;
+  if (!$("meetingDate").value) $("meetingDate").value = isoToday();
+  refreshHistoryUI();
+  $("results").hidden = true; $("sendPanel").hidden = true;
   $("setup").hidden = true; $("tool").hidden = false;
 }
 
+/* ---------- Meeting history (for follow-ups) ---------- */
+function profileKey() { return `${profile.type}|${(profile.org || "").toLowerCase()}`; }
+function getHistory() { return readStore(HISTORY_KEY, []).filter(h => h.profile === profileKey()); }
+function saveToHistory(result, meetingDate) {
+  const all = readStore(HISTORY_KEY, []);
+  all.unshift({ id: Date.now(), profile: profileKey(), meetingDate, savedAt: new Date().toISOString(),
+                summary: result.summary, action_items: result.action_items || [] });
+  // Keep the 20 most recent meetings per organization; only results are stored, never raw notes.
+  const mine = all.filter(h => h.profile === profileKey()).slice(0, 20);
+  const others = all.filter(h => h.profile !== profileKey());
+  return writeStore(HISTORY_KEY, [...mine, ...others]);
+}
+function refreshHistoryUI() {
+  const hist = getHistory();
+  const opts = ['<option value="">Don\'t check an earlier meeting</option>'].concat(
+    hist.map((h, i) => `<option value="${h.id}" ${i === 0 ? "selected" : ""}>${escapeHtml(prettyDate(h.meetingDate) || h.meetingDate)} · ${h.action_items.length} item${h.action_items.length === 1 ? "" : "s"}</option>`));
+  $("prevSelect").innerHTML = opts.join("");
+  $("prevSelect").disabled = hist.length === 0;
+  $("historyNote").textContent = hist.length
+    ? `${hist.length} earlier meeting${hist.length > 1 ? "s" : ""} saved in this browser. The most recent is selected, so Claude will check which items got done.`
+    : "After your first meeting, results are saved in this browser so the next meeting can check what got done.";
+  $("clearHistory").hidden = hist.length === 0;
+}
+function selectedPrevious() {
+  const id = Number($("prevSelect").value);
+  return id ? getHistory().find(h => h.id === id) || null : null;
+}
+
 /* ---------- Prompt, tailored to the organization ---------- */
-function buildSystemPrompt() {
+function buildSystemPrompt(meetingDate, previous) {
   const c = cfg();
   const context = [];
   if (profile.org) context.push(`Organization: ${profile.org}.`);
@@ -432,25 +574,41 @@ function buildSystemPrompt() {
   context.push(`These notes usually come from: ${profile.meeting.toLowerCase()}. The people involved are mostly ${c.people}.`);
   if (profile.focus.length) context.push(`The organization asked you to watch most closely for: ${profile.focus.map(f => FOCUS[f].toLowerCase()).join("; ")}. Make sure no item in these areas is missed, and lean toward high priority for them.`);
 
+  let followBlock = "", followKey = "";
+  if (previous && previous.action_items.length) {
+    const list = previous.action_items.map((it, i) =>
+      `[${i + 1}] ${it.task} | owner: ${it.owner || "unassigned"} | due: ${it.due_date || it.due || "none"}`).join("\n");
+    followBlock = `
+
+Action items from the previous meeting on ${previous.meetingDate}. Check each one against today's notes:
+${list}`;
+    followKey = `,
+  "follow_ups": [ { "id": number, "status": "done" | "in_progress" | "blocked" | "not_mentioned", "note": string or null } ]`;
+  }
+
   return `You turn raw meeting notes into a clear, structured record for a team.
 
 About this team:
 ${context.join("\n")}
 
+This meeting took place on ${meetingDate} (a ${weekday(meetingDate)}).${followBlock}
+
 Return ONLY a JSON object, no prose and no code fences, with exactly these keys:
 {
   "summary": string (2-3 sentences, plain language, using the team's own terms),
-  "action_items": [ { "task": string, "owner": string or null, "due": string or null, "priority": "high" | "medium" | "low" } ],
+  "action_items": [ { "task": string, "owner": string or null, "due": string or null, "due_date": "YYYY-MM-DD" or null, "priority": "high" | "medium" | "low" } ],
   "decisions": [ string ],
-  "open_questions": [ string ]
+  "open_questions": [ string ]${followKey}
 }
 Rules:
 - Only include tasks someone needs to do after the meeting. Write each as a clear, specific instruction.
 - Use the owner's name exactly as written. If nobody took the task, owner is null. Never guess an owner.
-- Keep due dates as written ("Thursday", "the 30th"). If none was given, due is null.
+- "due" keeps the wording from the notes ("Thursday", "the 30th"). "due_date" converts it to a calendar date using the meeting date, or null if it is vague ("soon", "ongoing") or missing.
 - Priority: high = urgent, safety, compliance, or blocks other work; low = nice to have; otherwise medium.
 - Decisions are things the group agreed on. Open questions are unresolved items, including tasks with no owner.
-- If the notes contain no action items, return an empty array.`;
+- If the notes contain no action items, return an empty array.${followKey ? `
+- follow_ups must include every id from the previous meeting's list. Use "done" only if the notes say it was finished, "blocked" if something is stopping it, "in_progress" if work was reported, and "not_mentioned" if the notes say nothing about it. Keep "note" to one short sentence, or null.
+- Do not repeat a previous item as a new action item unless the notes assign new or changed work for it.` : ""}`;
 }
 
 /* ---------- Results ---------- */
@@ -460,37 +618,78 @@ function parseJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
-function render(data, isDemo) {
-  current = data;
+/* Overdue is decided here, not by the model: not done + had a due date + that date is before this meeting */
+function withOverdue(f, meetingDate) {
+  const overdue = f.status !== "done" && f.due_date && f.due_date < meetingDate;
+  return { ...f, overdue };
+}
+
+const STATUS_LABEL = { done: "Done", in_progress: "In progress", blocked: "Blocked", not_mentioned: "Not mentioned" };
+
+function render(result, meetingDate, follow, isDemo, previousDate) {
+  current = { result, meetingDate, follow: follow.map(f => withOverdue(f, meetingDate)), isDemo };
   $("demoBadge").hidden = !isDemo;
-  $("summary").textContent = data.summary || "";
-  const items = data.action_items || [];
+  $("summary").textContent = result.summary || "";
+
+  // Follow-ups
+  $("followSection").hidden = current.follow.length === 0;
+  if (current.follow.length) {
+    const overdueCount = current.follow.filter(f => f.overdue).length;
+    const doneCount = current.follow.filter(f => f.status === "done").length;
+    $("followFrom").textContent = `— ${previousDate ? prettyDate(previousDate) + " · " : ""}${doneCount} of ${current.follow.length} done${overdueCount ? `, ${overdueCount} overdue` : ""}`;
+    const order = (f) => f.overdue ? 0 : f.status === "blocked" ? 1 : f.status === "done" ? 3 : 2;
+    $("follow").innerHTML = [...current.follow].sort((a, b) => order(a) - order(b)).map(f => {
+      const status = STATUS_LABEL[f.status] || "Not mentioned";
+      const pill = f.overdue
+        ? `<span class="pill s-overdue">Overdue</span> <span class="note">${escapeHtml(status.toLowerCase())}</span>`
+        : `<span class="pill s-${f.status}">${status}</span>`;
+      return `<tr>
+        <td>${escapeHtml(f.task)}${f.note ? `<span class="due-date">${escapeHtml(f.note)}</span>` : ""}</td>
+        <td>${f.owner ? escapeHtml(f.owner) : '<span class="unassigned">Unassigned</span>'}</td>
+        <td>${f.due_date ? escapeHtml(prettyDate(f.due_date)) : (f.due ? escapeHtml(f.due) : '<span class="unassigned">—</span>')}</td>
+        <td>${pill}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // Action items
+  const items = result.action_items || [];
   $("items").innerHTML = items.length
     ? items.map((it, i) => {
         const p = ["high", "medium", "low"].includes(it.priority) ? it.priority : "medium";
+        const dueCell = it.due
+          ? `${escapeHtml(it.due)}${it.due_date && prettyDate(it.due_date) && prettyDate(it.due_date) !== it.due ? `<span class="due-date">${escapeHtml(prettyDate(it.due_date))}</span>` : ""}`
+          : (it.due_date ? escapeHtml(prettyDate(it.due_date)) : '<span class="unassigned">—</span>');
         return `<tr>
           <td>${i + 1}</td>
           <td>${escapeHtml(it.task)}</td>
           <td>${it.owner ? escapeHtml(it.owner) : '<span class="unassigned">Unassigned</span>'}</td>
-          <td>${it.due ? escapeHtml(it.due) : '<span class="unassigned">—</span>'}</td>
+          <td>${dueCell}</td>
           <td><span class="pill p-${p}">${p}</span></td>
         </tr>`;
       }).join("")
     : '<tr><td colspan="5" class="unassigned">No action items found.</td></tr>';
+
   const list = (arr) => (arr && arr.length) ? arr.map(x => `<li>${escapeHtml(x)}</li>`).join("") : '<li class="unassigned">None</li>';
-  $("decisions").innerHTML = list(data.decisions);
-  $("questions").innerHTML = list(data.open_questions);
-  $("results").hidden = false;
+  $("decisions").innerHTML = list(result.decisions);
+  $("questions").innerHTML = list(result.open_questions);
+
+  renderOwners();
+  $("exportHelp").textContent = "";
+  $("results").hidden = false; $("sendPanel").hidden = false;
   $("results").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function extract() {
   const key = $("key").value.trim();
   const notes = $("notes").value.trim();
+  const meetingDate = $("meetingDate").value || isoToday();
   if (!key) return setStatus("Add your Claude API key first, or try the demo result.", true);
   if (!notes) return setStatus("Paste some meeting notes first.", true);
+  const previous = selectedPrevious();
+
   $("run").disabled = true;
-  setStatus("Reading your notes…");
+  setStatus(previous ? "Reading your notes and checking last meeting's items…" : "Reading your notes…");
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -502,16 +701,29 @@ async function extract() {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 2000,
-        system: buildSystemPrompt(),
+        max_tokens: 3000,
+        system: buildSystemPrompt(meetingDate, previous),
         messages: [{ role: "user", content: `Meeting notes:\n\n${notes}` }]
       })
     });
     const body = await res.json();
     if (!res.ok) throw new Error(body?.error?.message || `API error (${res.status})`);
     const text = (body.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-    render(parseJson(text), false);
-    setStatus(`Done — ${current.action_items?.length || 0} action items found.`);
+    const result = parseJson(text);
+
+    let follow = [];
+    if (previous) {
+      const byId = new Map((result.follow_ups || []).map(f => [Number(f.id), f]));
+      follow = previous.action_items.map((it, i) => {
+        const f = byId.get(i + 1) || {};
+        const status = STATUS_LABEL[f.status] ? f.status : "not_mentioned";
+        return { task: it.task, owner: it.owner, due: it.due, due_date: it.due_date, status, note: f.note || null };
+      });
+    }
+    render(result, meetingDate, follow, false, previous?.meetingDate);
+    const saved = saveToHistory(result, meetingDate);
+    refreshHistoryUI();
+    setStatus(`Done — ${result.action_items?.length || 0} action items found.` + (saved ? " Saved for next meeting's check-in." : ""));
   } catch (err) {
     setStatus(err.message || "Something went wrong.", true);
   } finally {
@@ -519,26 +731,130 @@ async function extract() {
   }
 }
 
-/* ---------- Export ---------- */
-function toMarkdown(d) {
-  const heading = profile.org ? `## ${profile.org}: meeting summary` : "## Meeting summary";
-  const cell = (s) => String(s ?? "").replace(/\|/g, "\\|");
-  const lines = [heading, "", d.summary || "", "", "## Action items", "", "| # | Task | Owner | Due | Priority |", "|---|---|---|---|---|"];
-  (d.action_items || []).forEach((it, i) =>
-    lines.push(`| ${i + 1} | ${cell(it.task)} | ${cell(it.owner || "Unassigned")} | ${cell(it.due || "—")} | ${cell(it.priority)} |`));
-  lines.push("", "## Decisions", "", ...(d.decisions || []).map(x => `- ${x}`));
-  lines.push("", "## Open questions", "", ...(d.open_questions || []).map(x => `- ${x}`));
+function showDemo() {
+  const key = typeKeyForSamples();
+  const meetingDate = $("meetingDate").value || isoToday();
+  const demo = ORG_TYPES[key].demo;
+  const follow = (DEMO_FOLLOW[key] || []).map(f => ({ task: f.task, owner: f.owner, due: null, due_date: addDays(meetingDate, f.due_in), status: f.status, note: f.note }));
+  $("notes").value = sampleNotes();
+  render(demo, meetingDate, follow, true, addDays(meetingDate, -7));
+  setStatus("Showing a saved example result. Demo results aren't saved.");
+}
+
+/* ---------- Email each owner ---------- */
+function ownerTasks() {
+  // owner name -> { items: [...new action items], open: [...unfinished follow-ups] }
+  const map = new Map();
+  const add = (name, kind, item) => {
+    const k = name.toLowerCase();
+    if (!map.has(k)) map.set(k, { name, items: [], open: [] });
+    map.get(k)[kind].push(item);
+  };
+  (current.result.action_items || []).forEach(it => splitOwners(it.owner).forEach(n => add(n, "items", it)));
+  current.follow.filter(f => f.status !== "done").forEach(f => splitOwners(f.owner).forEach(n => add(n, "open", f)));
+  return [...map.values()];
+}
+function renderOwners() {
+  const roster = readStore(ROSTER_KEY, {});
+  const owners = ownerTasks();
+  $("owners").innerHTML = owners.length
+    ? owners.map((o, i) => {
+        const count = o.items.length + o.open.length;
+        return `<div class="owner-row">
+          <div class="owner-name">${escapeHtml(o.name)} <span class="owner-count">· ${count} task${count > 1 ? "s" : ""}</span></div>
+          <input type="email" data-owner="${escapeHtml(o.name.toLowerCase())}" placeholder="email (optional)" value="${escapeHtml(roster[o.name.toLowerCase()] || "")}">
+          <button class="small" data-email="${i}">Email</button>
+        </div>`;
+      }).join("")
+    : '<p class="unassigned" style="margin:0">No tasks have an owner yet.</p>';
+  $("owners").querySelectorAll("input[data-owner]").forEach(inp => inp.addEventListener("change", () => {
+    const r = readStore(ROSTER_KEY, {});
+    const v = inp.value.trim();
+    if (v) r[inp.dataset.owner] = v; else delete r[inp.dataset.owner];
+    writeStore(ROSTER_KEY, r);
+  }));
+  $("owners").querySelectorAll("button[data-email]").forEach(btn => btn.addEventListener("click", () => emailOwner(owners[Number(btn.dataset.email)])));
+}
+function dueText(it) {
+  if (it.due_date && prettyDate(it.due_date)) return ` (due ${prettyDate(it.due_date)})`;
+  return it.due ? ` (due ${it.due})` : "";
+}
+function openMail(to, subject, body) {
+  const url = `mailto:${encodeURIComponent(to || "").replace(/%2C/g, ",").replace(/%40/g, "@")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = url;
+}
+function meetingLabel() {
+  return `${profile.org ? profile.org + " " : ""}${meetingName()} on ${prettyDate(current.meetingDate) || current.meetingDate}`;
+}
+function emailOwner(o) {
+  const roster = readStore(ROSTER_KEY, {});
+  const first = o.name.split(" ")[0];
+  const lines = [`Hi ${first},`, "", `Here are your action items from the ${meetingLabel()}:`, ""];
+  o.items.forEach((it, i) => lines.push(`${i + 1}. ${it.task}${dueText(it)}`));
+  if (o.open.length) {
+    lines.push("", "Still open from last meeting:");
+    o.open.forEach(f => lines.push(`- ${f.task}${f.overdue ? " (OVERDUE)" : ""}${f.note ? ` — ${f.note}` : ""}`));
+  }
+  lines.push("", "Let me know if anything here doesn't look right.", "", "Thanks!");
+  openMail(roster[o.name.toLowerCase()], `Your action items from the ${meetingLabel()}`, lines.join("\n"));
+}
+function emailAll() {
+  const roster = readStore(ROSTER_KEY, {});
+  const to = [...new Set(ownerTasks().map(o => roster[o.name.toLowerCase()]).filter(Boolean))].join(",");
+  openMail(to, `Recap: ${meetingLabel()}`, toPlainRecap());
+}
+
+/* ---------- Exports ---------- */
+function toPlainRecap() {
+  const r = current.result;
+  const lines = [`Recap of the ${meetingLabel()}`, "", r.summary || "", "", "ACTION ITEMS"];
+  (r.action_items || []).forEach((it, i) => lines.push(`${i + 1}. ${it.task} — ${it.owner || "Unassigned"}${dueText(it)}`));
+  if (current.follow.length) {
+    lines.push("", "FROM LAST MEETING");
+    current.follow.forEach(f => lines.push(`- ${f.task} — ${f.owner || "Unassigned"}: ${f.overdue ? "OVERDUE, " : ""}${(STATUS_LABEL[f.status] || "").toLowerCase()}`));
+  }
+  if ((r.decisions || []).length) { lines.push("", "DECISIONS"); r.decisions.forEach(d => lines.push(`- ${d}`)); }
+  if ((r.open_questions || []).length) { lines.push("", "OPEN QUESTIONS"); r.open_questions.forEach(q => lines.push(`- ${q}`)); }
   return lines.join("\n");
 }
-function toCsv(d) {
+function toMarkdown() {
+  const r = current.result;
+  const cell = (s) => String(s ?? "").replace(/\|/g, "\\|");
+  const lines = [`## ${profile.org ? profile.org + ": " : ""}${meetingName()} recap, ${prettyDate(current.meetingDate)}`, "", r.summary || ""];
+  if (current.follow.length) {
+    lines.push("", "### From last meeting", "", "| Task | Owner | Status |", "|---|---|---|");
+    current.follow.forEach(f => lines.push(`| ${cell(f.task)} | ${cell(f.owner || "Unassigned")} | ${f.overdue ? "**Overdue**, " : ""}${STATUS_LABEL[f.status]} |`));
+  }
+  lines.push("", "### Action items", "", "| # | Task | Owner | Due | Priority |", "|---|---|---|---|---|");
+  (r.action_items || []).forEach((it, i) =>
+    lines.push(`| ${i + 1} | ${cell(it.task)} | ${cell(it.owner || "Unassigned")} | ${cell(it.due || prettyDate(it.due_date) || "—")} | ${cell(it.priority)} |`));
+  lines.push("", "### Decisions", "", ...((r.decisions || []).length ? r.decisions.map(x => `- ${x}`) : ["- None"]));
+  lines.push("", "### Open questions", "", ...((r.open_questions || []).length ? r.open_questions.map(x => `- ${x}`) : ["- None"]));
+  return lines.join("\n");
+}
+function rows() {
+  return (current.result.action_items || []).map((it, i) =>
+    [i + 1, it.task, it.owner || "Unassigned", it.due || "", it.due_date || "", it.priority || "medium"]);
+}
+function toCsv(header, data) {
   const q = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
-  const rows = [["#", "Task", "Owner", "Due", "Priority"].map(q).join(",")];
-  (d.action_items || []).forEach((it, i) => rows.push([i + 1, it.task, it.owner || "Unassigned", it.due || "", it.priority].map(q).join(",")));
-  return rows.join("\n");
+  return [header, ...data].map(r => r.map(q).join(",")).join("\n");
+}
+function download(name, text, type = "text/csv") {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function fileSlug() {
-  return (profile.org || "meeting").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "meeting";
+  const base = (profile.org || "meeting").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "meeting";
+  return `${base}-${current.meetingDate}`;
 }
+async function copyText(text, okMsg) {
+  try { await navigator.clipboard.writeText(text); setStatus(okMsg); return true; }
+  catch { setStatus("Couldn't copy — your browser blocked clipboard access.", true); return false; }
+}
+function usDate(iso) { if (!iso) return ""; const [y, m, d] = iso.split("-"); return `${m}/${d}/${y}`; }
 
 /* ---------- Wire up ---------- */
 buildSetup();
@@ -547,29 +863,52 @@ $("skipSetup").addEventListener("click", () => finishSetup(true));
 $("editSetup").addEventListener("click", showSetup);
 $("run").addEventListener("click", extract);
 $("sample").addEventListener("click", () => { $("notes").value = sampleNotes(); setStatus("Sample notes loaded."); });
-$("demo").addEventListener("click", () => {
-  $("notes").value = sampleNotes(); render(demoResult(), true); setStatus("Showing a saved example result.");
+$("demo").addEventListener("click", showDemo);
+$("clearHistory").addEventListener("click", () => {
+  if (!confirm("Delete all saved meetings for this organization from this browser?")) return;
+  writeStore(HISTORY_KEY, readStore(HISTORY_KEY, []).filter(h => h.profile !== profileKey()));
+  refreshHistoryUI(); setStatus("Saved meetings cleared.");
 });
-$("copyMd").addEventListener("click", async () => {
+
+$("copyMd").addEventListener("click", () => current && copyText(toMarkdown(), "Recap copied as Markdown — paste into email, Slack or a doc."));
+$("emailAll").addEventListener("click", () => current && emailAll());
+
+$("copySheets").addEventListener("click", async () => {
   if (!current) return;
-  try { await navigator.clipboard.writeText(toMarkdown(current)); setStatus("Copied as Markdown."); }
-  catch { setStatus("Couldn't copy — your browser blocked clipboard access.", true); }
+  const tsv = [["#", "Task", "Owner", "Due", "Due date", "Priority"], ...rows()]
+    .map(r => r.map(c => String(c).replace(/[\t\n]/g, " ")).join("\t")).join("\n");
+  if (await copyText(tsv, "Copied. Click a cell in Google Sheets or Excel and paste."))
+    $("exportHelp").textContent = "Click cell A1 in a sheet and paste. Each item lands in its own row with separate columns.";
 });
 $("csv").addEventListener("click", () => {
   if (!current) return;
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([toCsv(current)], { type: "text/csv" }));
-  a.download = `${fileSlug()}-action-items.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  download(`${fileSlug()}-action-items.csv`, toCsv(["#", "Task", "Owner", "Due", "Due date", "Priority"], rows()));
+  $("exportHelp").textContent = "Open the CSV in Excel, or in Google Sheets use File → Import.";
+});
+$("asanaCsv").addEventListener("click", () => {
+  if (!current) return;
+  const roster = readStore(ROSTER_KEY, {});
+  const data = (current.result.action_items || []).map(it => {
+    const owners = splitOwners(it.owner);
+    const email = owners.length === 1 ? (roster[owners[0].toLowerCase()] || "") : "";
+    const desc = `Owner: ${it.owner || "Unassigned"}. Priority: ${it.priority}. From the ${meetingLabel()}.`;
+    return [it.task, desc, email, usDate(it.due_date)];
+  });
+  download(`${fileSlug()}-asana-import.csv`, toCsv(["Name", "Description", "Assignee", "Due Date"], data));
+  $("exportHelp").textContent = "In Asana, open your project → the arrow next to its name → Import → CSV, and pick this file. Assignees fill in for owners whose email you entered.";
+});
+$("copyTrello").addEventListener("click", async () => {
+  if (!current) return;
+  const lines = (current.result.action_items || []).map(it => `${it.task} — ${it.owner || "Unassigned"}${dueText(it)}`);
+  if (await copyText(lines.join("\n"), "Copied as Trello cards."))
+    $("exportHelp").textContent = "In Trello, click \"Add a card\" on a list and paste. Trello will offer to create one card per line.";
 });
 $("shareLink").addEventListener("click", async () => {
   const p = new URLSearchParams({ type: profile.type, meeting: profile.meeting });
   if (profile.org) p.set("org", profile.org);
   if (profile.focus.length) p.set("focus", profile.focus.join(","));
   const url = `${location.origin}${location.pathname}?${p}`;
-  try { await navigator.clipboard.writeText(url); setStatus("Tailored link copied. Anyone who opens it skips setup."); }
-  catch { setStatus(url); }
+  if (!(await copyText(url, "Tailored link copied. Anyone who opens it skips setup."))) setStatus(url);
 });
 
 profile = loadProfile();
