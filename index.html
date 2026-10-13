@@ -8,19 +8,19 @@
   :root {
     --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1c1a; --muted: #6b6860;
     --line: #e2dfd6; --accent: #c2410c; --accent-ink: #ffffff; --accent-soft: #fdeee4;
-    --high: #b91c1c; --med: #b45309; --low: #047857; --soft: #fbfaf7;
+    --high: #b91c1c; --med: #b45309; --low: #047857; --soft: #fbfaf7; --rec: #dc2626;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #161513; --panel: #1f1e1b; --ink: #ecebe6; --muted: #a29f96;
       --line: #34322d; --accent: #f97316; --accent-ink: #1a1208; --accent-soft: #2e2116;
-      --high: #f87171; --med: #fbbf24; --low: #34d399; --soft: #24231f;
+      --high: #f87171; --med: #fbbf24; --low: #34d399; --soft: #24231f; --rec: #ef4444;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
     font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 16px 64px; }
   .eyebrow { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
   header h1 { margin: 0 0 4px; font-size: 1.75rem; letter-spacing: -0.01em; }
   header p { margin: 0; color: var(--muted); }
@@ -28,55 +28,80 @@
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 20px; }
   label, .label { display: block; font-weight: 600; margin-bottom: 6px; }
   .hint { color: var(--muted); font-size: 0.875rem; font-weight: 400; }
-  input[type=password], input[type=text], textarea, select {
+  input[type=password], input[type=text], input[type=email], input[type=url], input[type=date], textarea, select {
     width: 100%; padding: 10px 12px; border: 1px solid var(--line);
     border-radius: 8px; background: var(--soft); color: var(--ink); font: inherit; }
-  textarea { min-height: 240px; resize: vertical; font-size: 0.95rem; }
+  textarea { min-height: 200px; resize: vertical; font-size: 0.95rem; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
   button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 8px;
     border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
   button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   button.link { border: none; background: none; color: var(--accent); padding: 4px 0; }
+  button.small { padding: 6px 12px; font-size: 0.9rem; }
   button:disabled { opacity: 0.55; cursor: not-allowed; }
   .status { color: var(--muted); font-size: 0.9rem; }
   .error { color: var(--high); }
   h2 { font-size: 1.15rem; margin: 0 0 10px; }
+  h3 { font-size: 1rem; margin: 0 0 4px; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-  .pill { display: inline-block; font-size: 0.78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); white-space: nowrap; }
+  td select, td input { padding: 5px 8px; font-size: 0.9rem; }
+  .pill { display: inline-block; font-size: 0.78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+  .p-urgent { color: var(--accent-ink) !important; background: var(--high) !important; border-color: var(--high) !important; }
   .p-high { color: var(--high); } .p-medium { color: var(--med); } .p-low { color: var(--low); }
+  select.p-high, select.p-medium, select.p-low, select.p-urgent { font-weight: 700; border-color: currentColor; min-width: 96px; }
+  .s-done { color: var(--low); } .s-in_progress { color: var(--med); } .s-blocked { color: var(--high); }
+  .s-not_mentioned, .s-open, .s-dropped { color: var(--muted); }
+  .overdue-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; color: var(--accent-ink); background: var(--high); padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
   .unassigned { color: var(--muted); font-style: italic; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  .sub { display: block; color: var(--muted); font-size: 0.8rem; }
+  .cols, .send-grid, .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .cols, .send-grid, .grid2 { grid-template-columns: 1fr; } }
   ul.clean { margin: 0; padding-left: 20px; }
-  .badge { font-size: 0.75rem; color: var(--muted); border: 1px dashed var(--line); padding: 2px 8px; border-radius: 6px; }
+  .badge { font-size: 0.75rem; color: var(--muted); border: 1px dashed var(--line); padding: 2px 8px; border-radius: 6px; font-weight: 400; }
   .notice { background: var(--accent-soft); border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; margin-top: 10px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
   .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
   @media (max-width: 700px) { .checks { grid-template-columns: 1fr; } }
-  .checks label { font-weight: 400; display: flex; gap: 8px; align-items: center; margin: 0; }
+  .checks label, label.inline { font-weight: 400; display: flex; gap: 8px; align-items: center; margin: 0; }
   .field { margin-top: 16px; }
-  .s-done { color: var(--low); } .s-in_progress { color: var(--med); } .s-blocked { color: var(--high); }
-  .s-not_mentioned { color: var(--muted); } .s-overdue { color: var(--accent-ink); background: var(--high); border-color: var(--high); }
-  .due-date { display: block; color: var(--muted); font-size: 0.8rem; }
-  .note { color: var(--muted); font-size: 0.88rem; }
-  .send-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 760px) { .send-grid { grid-template-columns: 1fr; } }
   .card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--soft); }
-  .card h3 { margin: 0 0 4px; font-size: 1rem; }
   .card p { margin: 0 0 10px; color: var(--muted); font-size: 0.88rem; }
-  .owner-row { display: grid; grid-template-columns: minmax(80px, 1fr) 2fr auto; gap: 8px; align-items: center; margin-top: 8px; }
-  @media (max-width: 520px) { .owner-row { grid-template-columns: 1fr; } }
-  .owner-row input { padding: 7px 10px; }
-  .owner-name { font-weight: 600; }
-  .owner-count { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
-  button.small { padding: 6px 12px; font-size: 0.9rem; }
   .btns { display: flex; gap: 8px; flex-wrap: wrap; }
   .inline-fields { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; align-items: flex-end; }
   .inline-fields > div { flex: 1 1 220px; }
+  /* People rows */
+  .person-row { display: grid; grid-template-columns: 1.1fr 1.6fr 1.1fr auto auto; gap: 8px; align-items: center; margin-top: 8px; }
+  .person-row input, .person-row select { padding: 7px 10px; font-size: 0.92rem; }
+  @media (max-width: 640px) { .person-row { grid-template-columns: 1fr 1fr; } }
+  .owner-row { display: grid; grid-template-columns: 1.5fr 1fr auto; gap: 6px 8px; align-items: center; margin-top: 12px; }
+  .owner-row .owner-name { grid-column: 1 / -1; }
+  .owner-row input, .owner-row select { padding: 7px 10px; font-size: 0.9rem; min-width: 0; }
+  @media (max-width: 420px) { .owner-row { grid-template-columns: 1fr 1fr; } .owner-row input { grid-column: 1 / -1; } }
+  .owner-name { font-weight: 600; }
+  .owner-count { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+  .x { border: none; background: none; color: var(--muted); font-size: 1.2rem; padding: 2px 8px; }
+  /* Team panel */
+  details.panel > summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  details.panel > summary::after { content: "Show"; color: var(--accent); font-size: 0.9rem; }
+  details.panel[open] > summary::after { content: "Hide"; }
+  .sync-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--muted); margin-right: 6px; }
+  .sync-dot.on { background: var(--low); } .sync-dot.err { background: var(--high); }
+  /* Recorder */
+  .recorder { margin-top: 16px; border: 1px dashed var(--line); border-radius: 10px; padding: 14px; }
+  .rec-btn.recording { background: var(--rec); color: #fff; border-color: var(--rec); }
+  .rec-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; margin-right: 6px; vertical-align: 0; }
+  .recording .rec-dot { animation: pulse 1.2s infinite; background: #fff; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .interim { color: var(--muted); font-style: italic; font-size: 0.9rem; min-height: 1.4em; margin-top: 8px; }
+  /* Digest */
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 120px; background: var(--soft); }
+  .stat b { display: block; font-size: 1.5rem; line-height: 1.1; }
+  .stat span { color: var(--muted); font-size: 0.85rem; }
+  .stat.bad b { color: var(--high); }
   footer { margin-top: 28px; color: var(--muted); font-size: 0.85rem; }
   [hidden] { display: none !important; }
 </style>
@@ -131,12 +156,76 @@
       </div>
     </header>
 
+    <!-- Team & sync -->
+    <details class="panel" id="teamPanel">
+      <summary><span>Team &amp; shared history <span class="hint" id="teamSummary"></span></span></summary>
+      <div style="margin-top:14px">
+        <h3>People</h3>
+        <p class="hint" style="margin:0 0 6px">Add anyone who might own a task. Their email and language are used for task emails, and the team lead gets the weekly overdue digest.</p>
+        <div id="people"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="small" id="addPerson">+ Add person</button>
+        </div>
+
+        <h3 style="margin-top:22px">Shared team history</h3>
+        <p class="hint" style="margin:0 0 8px" id="syncStatus"></p>
+        <div id="syncForm">
+          <div class="grid2">
+            <div>
+              <label for="syncUrl">Team sheet link <span class="hint">— from the setup guide</span></label>
+              <input id="syncUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+            <div>
+              <label for="syncCode">Team passcode</label>
+              <input id="syncCode" type="password" placeholder="the passcode in your script" autocomplete="off">
+            </div>
+          </div>
+          <div class="row">
+            <button class="small primary" id="syncConnect">Connect team sheet</button>
+            <a class="hint" href="https://github.com/mykel23/meeting-action-items/blob/main/team-sync/SETUP.md" target="_blank" rel="noopener">Setup guide (5 minutes, free)</a>
+          </div>
+        </div>
+        <div class="row" id="syncConnected" hidden>
+          <button class="small" id="syncRefresh">Refresh now</button>
+          <button class="small" id="syncDisconnect">Disconnect</button>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <span class="hint">No Google account? Move history between devices with a backup file:</span>
+          <button class="small" id="exportBackup">Export backup</button>
+          <button class="small" id="importBtn" type="button">Import backup</button>
+          <input id="importFile" type="file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+    </details>
+
+    <!-- Input -->
     <div class="panel">
       <label for="key">Claude API key <span class="hint">— stays in this browser tab only, never saved</span></label>
       <input id="key" type="password" placeholder="sk-ant-..." autocomplete="off">
 
       <label for="notes" style="margin-top:16px" id="notesLabel">Meeting notes</label>
       <textarea id="notes"></textarea>
+
+      <div class="recorder">
+        <div class="row" style="margin-top:0; justify-content:space-between">
+          <div>
+            <h3 style="margin:0">Record the meeting <span class="hint">— optional, works alongside your typed notes</span></h3>
+          </div>
+          <div class="row" style="margin-top:0">
+            <select id="recLang" style="width:auto" aria-label="Language spoken in the meeting"></select>
+            <button class="rec-btn" id="recBtn"><span class="rec-dot"></span><span id="recLabel">Start recording</span></button>
+            <span class="status" id="recTimer"></span>
+          </div>
+        </div>
+        <p class="hint" id="recHelp" style="margin:8px 0 0">Your browser turns speech into text as people talk. You can edit the transcript before extracting. Let everyone know you're recording.</p>
+        <div class="interim" id="interim"></div>
+        <div id="transcriptWrap" hidden>
+          <label for="transcript" style="margin-top:8px">Transcript <span class="hint">— edit freely; Claude reads this and your typed notes together</span></label>
+          <textarea id="transcript" style="min-height:140px"></textarea>
+          <div class="row" style="margin-top:6px"><button class="link small" id="clearTranscript">Clear transcript</button></div>
+        </div>
+      </div>
+
       <div class="notice" id="privacy" hidden></div>
 
       <div class="inline-fields">
@@ -145,23 +234,19 @@
           <input id="meetingDate" type="date">
         </div>
         <div>
-          <label for="prevSelect">Check progress on <span class="hint">— items from an earlier meeting</span></label>
-          <select id="prevSelect"></select>
+          <label class="inline" style="margin-bottom:10px"><input type="checkbox" id="checkOpen" checked> <span id="checkOpenLabel">Check progress on open items from earlier meetings</span></label>
         </div>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <span class="hint" id="historyNote"></span>
-        <button class="link small" id="clearHistory" hidden>Clear saved meetings</button>
       </div>
 
       <div class="row">
         <button class="primary" id="run">Extract action items</button>
         <button id="sample">Load sample notes</button>
         <button id="demo">See demo result (no key needed)</button>
-        <span class="status" id="status"></span>
+        <span class="status" id="status" role="status"></span>
       </div>
     </div>
 
+    <!-- Results -->
     <div class="panel" id="results" hidden>
       <div class="row" style="margin-top:0; justify-content:space-between">
         <h2 style="margin:0">Summary <span class="badge" id="demoBadge" hidden>demo output</span></h2>
@@ -170,7 +255,7 @@
       <p id="summary" style="margin:10px 0 0"></p>
 
       <div id="followSection" hidden>
-        <h2 style="margin-top:22px">Follow-up from last meeting <span class="hint" id="followFrom"></span></h2>
+        <h2 style="margin-top:22px">Follow-up on earlier items <span class="hint" id="followFrom"></span></h2>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Task</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
@@ -179,13 +264,14 @@
         </div>
       </div>
 
-      <h2 style="margin-top:22px">Action items</h2>
+      <h2 style="margin-top:22px">Action items <span class="hint">— change any owner or priority and everything updates</span></h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>Task</th><th>Owner</th><th>Due</th><th>Priority</th></tr></thead>
           <tbody id="items"></tbody>
         </table>
       </div>
+      <datalist id="peopleList"></datalist>
 
       <div class="cols" style="margin-top:22px">
         <div><h2>Decisions made</h2><ul class="clean" id="decisions"></ul></div>
@@ -193,12 +279,13 @@
       </div>
     </div>
 
+    <!-- Send & export -->
     <div class="panel" id="sendPanel" hidden>
       <h2>Send and export</h2>
       <div class="send-grid">
         <div class="card">
           <h3>Email each owner their tasks</h3>
-          <p>Opens a ready-to-send draft in your email app. Email addresses are remembered in this browser only.</p>
+          <p>Opens a ready-to-send draft in your email app, translated into each person's language. Translation uses your API key.</p>
           <div id="owners"></div>
           <div class="btns" style="margin-top:12px">
             <button class="small" id="emailAll">Email full recap to everyone</button>
@@ -220,7 +307,23 @@
       </div>
     </div>
 
-    <footer id="footer">Built with the Claude API. Your notes go straight from your browser to Anthropic's API; nothing is stored.</footer>
+    <!-- Weekly digest -->
+    <div class="panel" id="digestPanel" hidden>
+      <div class="row" style="margin-top:0; justify-content:space-between">
+        <h2 style="margin:0">Weekly overdue digest <span class="badge" id="digestDemo" hidden>demo</span></h2>
+        <span class="hint" id="digestAsOf"></span>
+      </div>
+      <div class="stats" id="digestStats" style="margin-top:12px"></div>
+      <div id="digestBody"></div>
+      <div class="btns" style="margin-top:14px">
+        <button class="small primary" id="emailDigest">Email digest to team lead</button>
+        <button class="small" id="copyDigest">Copy digest</button>
+        <button class="small" id="icsDigest">Add Monday reminder to my calendar</button>
+      </div>
+      <p class="hint" id="digestNote" style="margin:10px 0 0"></p>
+    </div>
+
+    <footer id="footer"></footer>
   </section>
 </div>
 
@@ -432,13 +535,197 @@ const DEMO_FOLLOW = {
   ]
 };
 
-/* ---------- Browser storage (wrapped: storage can be blocked in private windows) ---------- */
+/* ======================================================================
+   Constants
+   ====================================================================== */
+const PRIORITIES = ["urgent", "high", "medium", "low"];
+const PRIORITY_RANK = { urgent: 0, high: 1, medium: 2, low: 3 };
+const STATUS_LABEL = { open: "Open", done: "Done", in_progress: "In progress", blocked: "Blocked", not_mentioned: "Not mentioned", dropped: "No longer needed" };
+const MANUAL_STATUSES = ["open", "in_progress", "blocked", "done", "dropped"];
+
+/* Languages for task emails (common in Houston-area communities) */
+const LANGS = ["English", "Spanish", "Vietnamese", "Chinese (Simplified)", "Chinese (Traditional)", "Arabic", "Urdu",
+  "Tagalog", "French", "Haitian Creole", "Hindi", "Korean", "Portuguese", "Russian", "Swahili"];
+/* Languages the browser can listen for while recording */
+const REC_LANGS = [["en-US", "English"], ["es-US", "Spanish"], ["vi-VN", "Vietnamese"], ["zh-CN", "Chinese (Mandarin)"],
+  ["ar-SA", "Arabic"], ["fr-FR", "French"], ["fil-PH", "Tagalog"], ["hi-IN", "Hindi"], ["ko-KR", "Korean"], ["pt-BR", "Portuguese"]];
+
 const STORE_KEY = "mai-profile-v1";
 const HISTORY_KEY = "mai-history-v1";
-const ROSTER_KEY = "mai-roster-v1";
+const OLD_ROSTER_KEY = "mai-roster-v1";
+const PEOPLE_KEY = "mai-people-v1";
+const SYNC_KEY = "mai-sync-v1";
+
+/* ======================================================================
+   Small helpers
+   ====================================================================== */
+const $ = (id) => document.getElementById(id);
+let profile = null;
+let current = null;   // { meetingId, result, meetingDate, follow: [...], isDemo, demoTracker }
+
 function readStore(k, fallback) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fallback; } catch { return fallback; } }
 function writeStore(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+function setStatus(msg, isError = false) { $("status").textContent = msg; $("status").classList.toggle("error", isError); }
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function cfg() { return ORG_TYPES[profile?.type] || ORG_TYPES.general; }
+function typeKeyForSamples() { return ORG_TYPES[profile?.type]?.sample ? profile.type : "food"; }
+function sampleNotes() { return ORG_TYPES[typeKeyForSamples()].sample; }
+function isoToday() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+function addDays(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function validIso(iso) { return typeof iso === "string" && /^\d{4}-\d{2}-\d{2}$/.test(iso); }
+function prettyDate(iso) {
+  if (!validIso(iso)) return "";
+  return new Date(iso + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function weekday(iso) { return new Date(iso + "T12:00:00").toLocaleDateString("en-US", { weekday: "long" }); }
+function meetingName() { return profile.meeting === MEETING_TYPES[5] ? "meeting" : profile.meeting.toLowerCase().replace(/s$/, ""); }
+function normPriority(p) { return PRIORITIES.includes(p) ? p : "medium"; }
+function splitOwners(owner) {
+  if (!owner) return [];
+  return String(owner).split(/\s*(?:,|&|\band\b|\/)\s*/i).map(s => s.trim()).filter(Boolean);
+}
+function dueText(it) {
+  if (validIso(it.due_date)) return ` (due ${prettyDate(it.due_date)})`;
+  return it.due ? ` (due ${it.due})` : "";
+}
+function baseUrl() { return `${location.origin}${location.pathname}`; }
 
+/* ======================================================================
+   Data store: meetings + people. Saved in this browser, and mirrored to a
+   shared Google Sheet when the team connects one (see team-sync/SETUP.md).
+   ====================================================================== */
+const Store = {
+  meetings: [],
+  people: [],
+
+  load() {
+    this.meetings = readStore(HISTORY_KEY, []).map(migrateMeeting);
+    this.people = readStore(PEOPLE_KEY, null);
+    if (!Array.isArray(this.people)) {
+      // Migrate the older { name: email } roster
+      const old = readStore(OLD_ROSTER_KEY, {});
+      this.people = Object.entries(old).map(([k, email]) => ({ name: titleCase(k), email, language: "English", lead: false }));
+    }
+  },
+  persistLocal() { writeStore(HISTORY_KEY, this.meetings); writeStore(PEOPLE_KEY, this.people); },
+
+  mine() { return this.meetings.filter(m => m.profile === profileKey()); },
+  get(id) { return this.meetings.find(m => String(m.id) === String(id)); },
+
+  async saveMeeting(m) {
+    const i = this.meetings.findIndex(x => String(x.id) === String(m.id));
+    if (i >= 0) this.meetings[i] = m; else this.meetings.unshift(m);
+    this.persistLocal();
+    await Sync.push({ action: "saveMeetings", meetings: [m], tracker: trackerRows() });
+  },
+  async savePeople() {
+    this.persistLocal();
+    await Sync.push({ action: "savePeople", people: this.people });
+  },
+  findPerson(name) {
+    const k = String(name || "").trim().toLowerCase();
+    return this.people.find(p => p.name.trim().toLowerCase() === k);
+  },
+  lead() { return this.people.filter(p => p.lead && p.email); }
+};
+
+function titleCase(s) { return String(s).replace(/\b\w/g, c => c.toUpperCase()); }
+function profileKey() { return `${profile.type}|${(profile.org || "").toLowerCase()}`; }
+
+/* Older saved meetings had no item ids or follow-up links; add them */
+function migrateMeeting(m) {
+  m.action_items = (m.action_items || []).map((it, i) => ({ ...it, id: it.id || `${m.id}-${i}`, priority: normPriority(it.priority) }));
+  m.follow_ups = m.follow_ups || [];
+  m.decisions = m.decisions || [];
+  m.open_questions = m.open_questions || [];
+  return m;
+}
+
+/* ======================================================================
+   Shared team sheet (Google Apps Script web app)
+   ====================================================================== */
+const Sync = {
+  cfg: readStore(SYNC_KEY, null),     // { url, code }
+  state: "off",                        // off | ok | error
+  lastError: "",
+
+  on() { return !!(this.cfg && this.cfg.url); },
+
+  async request(payload) {
+    if (payload) {
+      // text/plain keeps this a "simple" request, which Apps Script accepts without CORS preflight
+      const res = await fetch(this.cfg.url, { method: "POST", body: JSON.stringify({ ...payload, code: this.cfg.code || "" }) });
+      return this.check(await res.json());
+    }
+    const res = await fetch(`${this.cfg.url}?code=${encodeURIComponent(this.cfg.code || "")}&t=${Date.now()}`);
+    return this.check(await res.json());
+  },
+  check(body) {
+    if (!body || body.ok !== true) throw new Error(body?.error || "The team sheet didn't respond as expected.");
+    return body;
+  },
+
+  async push(payload) {
+    if (!this.on()) return;
+    try { await this.request(payload); this.state = "ok"; this.lastError = ""; }
+    catch (e) { this.state = "error"; this.lastError = e.message; }
+    renderSyncStatus();
+  },
+
+  /* Pull everything from the sheet; upload anything this browser has that the sheet doesn't */
+  async pull() {
+    if (!this.on()) return;
+    try {
+      const body = await this.request(null);
+      const remote = (body.meetings || []).map(migrateMeeting);
+      const remoteIds = new Set(remote.map(m => String(m.id)));
+      const localOnly = Store.meetings.filter(m => !remoteIds.has(String(m.id)));
+      Store.meetings = [...remote, ...localOnly].sort((a, b) => b.meetingDate.localeCompare(a.meetingDate) || b.id - a.id);
+
+      const merged = [...(body.people || [])];
+      Store.people.forEach(p => { if (!merged.some(r => r.name.trim().toLowerCase() === p.name.trim().toLowerCase())) merged.push(p); });
+      const peopleChanged = merged.length !== (body.people || []).length;
+      Store.people = merged.map(p => ({ name: p.name, email: p.email || "", language: p.language || "English", lead: p.lead === true || p.lead === "TRUE" || p.lead === "true" }));
+      Store.persistLocal();
+
+      if (localOnly.length) await this.request({ action: "saveMeetings", meetings: localOnly, tracker: trackerRows() });
+      if (peopleChanged) await this.request({ action: "savePeople", people: Store.people });
+      this.state = "ok"; this.lastError = "";
+    } catch (e) {
+      this.state = "error"; this.lastError = e.message;
+    }
+    renderSyncStatus(); refreshAfterDataChange();
+  },
+
+  async connect(url, code) {
+    this.cfg = { url: url.trim(), code: code.trim() };
+    writeStore(SYNC_KEY, this.cfg);
+    await this.pull();
+    if (this.state === "error") return false;
+    return true;
+  },
+  disconnect() { this.cfg = null; this.state = "off"; writeStore(SYNC_KEY, null); renderSyncStatus(); }
+};
+
+function renderSyncStatus() {
+  const on = Sync.on();
+  $("syncForm").hidden = on && Sync.state !== "error";
+  $("syncConnected").hidden = !on;
+  const dot = `<span class="sync-dot ${on ? (Sync.state === "error" ? "err" : "on") : ""}"></span>`;
+  $("syncStatus").innerHTML = !on
+    ? `${dot}History is saved in this browser only. Connect a free Google Sheet so everyone on the team sees the same meetings and follow-ups, and so the Monday digest sends itself.`
+    : Sync.state === "error"
+      ? `${dot}Couldn't reach the team sheet: ${escapeHtml(Sync.lastError)} Your work is still saved in this browser.`
+      : `${dot}Connected. Meetings and people are shared with everyone who uses this team sheet.`;
+  const n = Store.people.length;
+  $("teamSummary").textContent = `— ${n} ${n === 1 ? "person" : "people"} · ${on ? (Sync.state === "error" ? "sheet error" : "shared") : "this browser only"}`;
+}
+
+/* ======================================================================
+   Setup survey (unchanged behavior)
+   ====================================================================== */
 function loadProfile() {
   const p = new URLSearchParams(location.search);
   if (p.get("type") && ORG_TYPES[p.get("type")]) {
@@ -451,43 +738,11 @@ function loadProfile() {
   }
   return readStore(STORE_KEY, null);
 }
-
-/* ---------- Helpers ---------- */
-const $ = (id) => document.getElementById(id);
-let profile = null;
-let current = null;      // { result, meetingDate, follow: [...], isDemo }
-
-function setStatus(msg, isError = false) {
-  $("status").textContent = msg;
-  $("status").classList.toggle("error", isError);
-}
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function cfg() { return ORG_TYPES[profile?.type] || ORG_TYPES.general; }
-function typeKeyForSamples() { return ORG_TYPES[profile?.type]?.sample ? profile.type : "food"; }
-function sampleNotes() { return ORG_TYPES[typeKeyForSamples()].sample; }
-function isoToday() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
-function addDays(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
-function prettyDate(iso) {
-  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
-  return new Date(iso + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-}
-function weekday(iso) { return new Date(iso + "T12:00:00").toLocaleDateString("en-US", { weekday: "long" }); }
-function meetingName() { return profile.meeting === MEETING_TYPES[5] ? "meeting" : profile.meeting.toLowerCase().replace(/s$/, ""); }
-
-/* Split "Alicia, Raj" or "Kim and Tariq" into separate owners */
-function splitOwners(owner) {
-  if (!owner) return [];
-  return owner.split(/\s*(?:,|&|\band\b|\/)\s*/i).map(s => s.trim()).filter(Boolean);
-}
-
-/* ---------- Setup survey ---------- */
 function buildSetup() {
   $("sType").innerHTML = Object.entries(ORG_TYPES).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("");
   $("sMeeting").innerHTML = MEETING_TYPES.map(m => `<option>${m}</option>`).join("");
-  $("sFocus").innerHTML = Object.entries(FOCUS).map(([k, v]) =>
-    `<label><input type="checkbox" value="${k}"> ${v}</label>`).join("");
+  $("sFocus").innerHTML = Object.entries(FOCUS).map(([k, v]) => `<label><input type="checkbox" value="${k}"> ${v}</label>`).join("");
+  $("recLang").innerHTML = REC_LANGS.map(([code, name]) => `<option value="${code}">${name}</option>`).join("");
 }
 function showSetup() {
   if (profile) {
@@ -502,91 +757,237 @@ function showSetup() {
 function finishSetup(skip) {
   profile = skip
     ? { org: "", type: "general", meeting: MEETING_TYPES[5], focus: [] }
-    : {
-        org: $("sOrg").value.trim().slice(0, 60),
-        type: $("sType").value,
-        meeting: $("sMeeting").value,
-        focus: [...document.querySelectorAll("#sFocus input:checked")].map(cb => cb.value)
-      };
+    : { org: $("sOrg").value.trim().slice(0, 60), type: $("sType").value, meeting: $("sMeeting").value,
+        focus: [...document.querySelectorAll("#sFocus input:checked")].map(cb => cb.value) };
   writeStore(STORE_KEY, profile);
-  if (location.search) history.replaceState(null, "", location.pathname);
   applyProfile();
 }
 
-/* ---------- Apply tailoring to the page ---------- */
 function applyProfile() {
   const c = cfg();
   const org = profile.org;
   const singular = profile.meeting === MEETING_TYPES[5] ? "Meeting" : profile.meeting.replace(/s$/, "").replace(/\b\w/g, ch => ch.toUpperCase());
-
   document.title = org ? `${org} · Action Items` : "Meeting Notes to Action Items";
   $("eyebrow").textContent = org ? `${org} · ${c.label}` : (profile.type === "general" ? "Meeting assistant" : c.label);
   $("title").textContent = profile.type === "general" ? "Meeting Notes → Action Items" : `${singular} Notes → Action Items`;
   $("subtitle").textContent = c.subtitle;
-  $("notesLabel").textContent = `Notes from your ${meetingName()}`;
-  $("notes").placeholder = `Paste notes from your ${meetingName()} here. Messy is fine: bullet points, half-sentences, names.`;
+  $("notesLabel").innerHTML = `Typed notes <span class="hint">— from your ${escapeHtml(meetingName())}; optional if you record</span>`;
+  $("notes").placeholder = `Paste or type notes from your ${meetingName()} here. Messy is fine: bullet points, half-sentences, names.`;
   $("sample").textContent = c.sample ? `Load sample ${c.label.split(" ")[0].toLowerCase()} notes` : "Load sample notes";
   $("privacy").hidden = !c.privacy;
-  $("privacy").textContent = "Tip: avoid pasting full client names, case numbers or health details. Initials work fine, and the action items come out just as clear.";
+  $("privacy").textContent = "Tip: avoid full client names, case numbers or health details in notes or recordings. Initials work fine, and the action items come out just as clear.";
   $("footer").textContent = (org ? `Set up for ${org}. ` : "") +
-    "Built with the Claude API. Your notes go straight from your browser to Anthropic's API. Results you save stay in this browser.";
-
+    "Built with the Claude API. Notes go straight from your browser to Anthropic's API. Saved results stay in this browser, or in your own team sheet if you connect one.";
   if (!$("meetingDate").value) $("meetingDate").value = isoToday();
-  refreshHistoryUI();
   $("results").hidden = true; $("sendPanel").hidden = true;
   $("setup").hidden = true; $("tool").hidden = false;
+  current = null;
+  refreshAfterDataChange();
 }
 
-/* ---------- Meeting history (for follow-ups) ---------- */
-function profileKey() { return `${profile.type}|${(profile.org || "").toLowerCase()}`; }
-function getHistory() { return readStore(HISTORY_KEY, []).filter(h => h.profile === profileKey()); }
-function saveToHistory(result, meetingDate) {
-  const all = readStore(HISTORY_KEY, []);
-  all.unshift({ id: Date.now(), profile: profileKey(), meetingDate, savedAt: new Date().toISOString(),
-                summary: result.summary, action_items: result.action_items || [] });
-  // Keep the 20 most recent meetings per organization; only results are stored, never raw notes.
-  const mine = all.filter(h => h.profile === profileKey()).slice(0, 20);
-  const others = all.filter(h => h.profile !== profileKey());
-  return writeStore(HISTORY_KEY, [...mine, ...others]);
+/* ======================================================================
+   People (team roster)
+   ====================================================================== */
+function langOptions(selected) {
+  return LANGS.map(l => `<option ${l === (selected || "English") ? "selected" : ""}>${escapeHtml(l)}</option>`).join("");
 }
-function refreshHistoryUI() {
-  const hist = getHistory();
-  const opts = ['<option value="">Don\'t check an earlier meeting</option>'].concat(
-    hist.map((h, i) => `<option value="${h.id}" ${i === 0 ? "selected" : ""}>${escapeHtml(prettyDate(h.meetingDate) || h.meetingDate)} · ${h.action_items.length} item${h.action_items.length === 1 ? "" : "s"}</option>`));
-  $("prevSelect").innerHTML = opts.join("");
-  $("prevSelect").disabled = hist.length === 0;
-  $("historyNote").textContent = hist.length
-    ? `${hist.length} earlier meeting${hist.length > 1 ? "s" : ""} saved in this browser. The most recent is selected, so Claude will check which items got done.`
-    : "After your first meeting, results are saved in this browser so the next meeting can check what got done.";
-  $("clearHistory").hidden = hist.length === 0;
+function renderPeople() {
+  $("people").innerHTML = Store.people.length
+    ? Store.people.map((p, i) => `<div class="person-row" data-i="${i}">
+        <input type="text" data-f="name" value="${escapeHtml(p.name)}" placeholder="Name" aria-label="Name">
+        <input type="email" data-f="email" value="${escapeHtml(p.email)}" placeholder="email@example.org" aria-label="Email">
+        <select data-f="language" aria-label="Preferred language">${langOptions(p.language)}</select>
+        <label class="inline" title="Gets the weekly overdue digest"><input type="checkbox" data-f="lead" ${p.lead ? "checked" : ""}> Team lead</label>
+        <button class="x" data-remove="${i}" aria-label="Remove ${escapeHtml(p.name)}">×</button>
+      </div>`).join("")
+    : '<p class="unassigned" style="margin:6px 0 0">No one added yet. Add people here, or they\'ll be added as you enter emails for task owners.</p>';
+  $("peopleList").innerHTML = Store.people.map(p => `<option value="${escapeHtml(p.name)}">`).join("");
+  renderSyncStatus();
 }
-function selectedPrevious() {
-  const id = Number($("prevSelect").value);
-  return id ? getHistory().find(h => h.id === id) || null : null;
+let peopleSaveTimer = null;
+function queuePeopleSave() {
+  clearTimeout(peopleSaveTimer);
+  peopleSaveTimer = setTimeout(() => Store.savePeople(), 600);
+}
+$("people").addEventListener("change", (e) => {
+  const row = e.target.closest(".person-row"); if (!row) return;
+  const p = Store.people[Number(row.dataset.i)]; const f = e.target.dataset.f;
+  if (f === "lead") p.lead = e.target.checked;
+  else if (f === "name") p.name = e.target.value.trim() || p.name;
+  else p[f] = e.target.value.trim();
+  Store.persistLocal(); queuePeopleSave();
+  $("peopleList").innerHTML = Store.people.map(x => `<option value="${escapeHtml(x.name)}">`).join("");
+  if (current) renderOwners();
+  renderDigest();
+});
+$("people").addEventListener("click", (e) => {
+  const i = e.target.dataset.remove; if (i === undefined) return;
+  Store.people.splice(Number(i), 1);
+  Store.persistLocal(); queuePeopleSave(); renderPeople(); if (current) renderOwners(); renderDigest();
+});
+$("addPerson").addEventListener("click", () => {
+  Store.people.push({ name: `Person ${Store.people.length + 1}`, email: "", language: "English", lead: Store.people.length === 0 });
+  Store.persistLocal(); renderPeople(); queuePeopleSave();
+  const rows = $("people").querySelectorAll(".person-row input[data-f=name]");
+  const last = rows[rows.length - 1]; if (last) { last.focus(); last.select(); }
+});
+function upsertPerson(name, fields) {
+  let p = Store.findPerson(name);
+  if (!p) { p = { name, email: "", language: "English", lead: false }; Store.people.push(p); }
+  Object.assign(p, fields);
+  Store.persistLocal(); queuePeopleSave(); renderPeople();
+  return p;
 }
 
-/* ---------- Prompt, tailored to the organization ---------- */
-function buildSystemPrompt(meetingDate, previous) {
+/* ======================================================================
+   Voice recording (browser speech recognition)
+   ====================================================================== */
+const Recorder = {
+  rec: null, active: false, started: 0, timer: null, wakeLock: null,
+  supported() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); },
+
+  start() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    this.rec = new SR();
+    this.rec.lang = $("recLang").value;
+    this.rec.continuous = true;
+    this.rec.interimResults = true;
+    this.rec.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const text = e.results[i][0].transcript.trim();
+        if (!text) continue;
+        if (e.results[i].isFinal) appendTranscript(text); else interim += text + " ";
+      }
+      $("interim").textContent = interim;
+    };
+    this.rec.onerror = (e) => {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        this.stop(); setRecHelp("Microphone access was blocked. Allow the microphone for this site in your browser settings, then try again.", true);
+      } else if (e.error === "network") {
+        setRecHelp("Speech recognition needs an internet connection. Still trying…", true);
+      }
+      // "no-speech" and "aborted" are normal pauses; onend restarts us
+    };
+    // Browsers stop listening after silence or ~60s; keep restarting while the meeting is recording
+    this.rec.onend = () => { if (this.active) { try { this.rec.start(); } catch {} } };
+    try { this.rec.start(); } catch (e) { setRecHelp("Couldn't start the microphone: " + e.message, true); return; }
+
+    this.active = true; this.started = Date.now();
+    $("recBtn").classList.add("recording"); $("recLabel").textContent = "Stop recording";
+    $("transcriptWrap").hidden = false; $("recLang").disabled = true;
+    setRecHelp("Listening… Speak normally. Names said with a task (\"Maria will call the landlord\") help Claude assign owners.");
+    this.timer = setInterval(() => {
+      const s = Math.floor((Date.now() - this.started) / 1000);
+      $("recTimer").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    }, 500);
+    // Keep the phone screen on so recording doesn't stop
+    if (navigator.wakeLock?.request) navigator.wakeLock.request("screen").then(l => this.wakeLock = l).catch(() => {});
+  },
+  stop() {
+    this.active = false;
+    try { this.rec?.stop(); } catch {}
+    clearInterval(this.timer);
+    $("recBtn").classList.remove("recording"); $("recLabel").textContent = $("transcript").value ? "Resume recording" : "Start recording";
+    $("recLang").disabled = false; $("interim").textContent = "";
+    try { this.wakeLock?.release(); } catch {}
+    this.wakeLock = null;
+    if ($("transcript").value.trim()) setRecHelp("Recording stopped. Check the transcript for misheard names, then extract.");
+  }
+};
+function appendTranscript(text) {
+  const t = $("transcript");
+  const sep = t.value && !/\s$/.test(t.value) ? (/[.!?]$/.test(t.value.trim()) ? " " : ". ") : "";
+  t.value += sep + text.charAt(0).toUpperCase() + text.slice(1);
+  t.scrollTop = t.scrollHeight;
+}
+function setRecHelp(msg, isError = false) { $("recHelp").textContent = msg; $("recHelp").classList.toggle("error", isError); }
+$("recBtn").addEventListener("click", () => {
+  if (!Recorder.supported()) {
+    setRecHelp("Voice recording isn't available in this browser. Use Chrome, Edge or Safari (iPhone or Mac), or type your notes instead.", true);
+    return;
+  }
+  Recorder.active ? Recorder.stop() : Recorder.start();
+});
+$("clearTranscript").addEventListener("click", () => {
+  if ($("transcript").value && !confirm("Clear the whole transcript?")) return;
+  $("transcript").value = ""; if (!Recorder.active) { $("transcriptWrap").hidden = true; $("recLabel").textContent = "Start recording"; }
+});
+
+/* ======================================================================
+   Tracking items across meetings
+   Each item lives in the meeting where it was assigned. Later meetings add
+   follow-ups; manual changes (Mark done, status menus) are stamped with a date.
+   ====================================================================== */
+function trackerItems(excludeMeetingId) {
+  const ms = Store.mine().filter(m => String(m.id) !== String(excludeMeetingId))
+    .sort((a, b) => a.meetingDate.localeCompare(b.meetingDate) || a.id - b.id);
+  const items = new Map();
+  for (const m of ms) {
+    for (const it of m.action_items) items.set(it.id, { ...it, meetingId: m.id, fromDate: m.meetingDate, status: "open", note: null, statusDate: m.meetingDate });
+    for (const f of m.follow_ups || []) {
+      const it = items.get(f.item_id); if (!it) continue;
+      if (f.status === "not_mentioned" && it.status !== "open") continue; // silence doesn't undo earlier progress
+      it.status = f.status; it.note = f.note || it.note; it.statusDate = m.meetingDate;
+    }
+  }
+  for (const it of items.values()) {
+    if (it.manual_status && (it.manual_date || "") >= (it.statusDate || "")) { it.status = it.manual_status; it.statusDate = it.manual_date; }
+  }
+  return [...items.values()];
+}
+function isOpen(it) { return it.status !== "done" && it.status !== "dropped"; }
+function isOverdue(it, asOf) { return isOpen(it) && validIso(it.due_date) && it.due_date < asOf; }
+
+/* Rows for the readable "Action Items" tab in the team sheet */
+function trackerRows() {
+  if (!profile) return [];
+  const today = isoToday();
+  return trackerItems(null).sort((a, b) => b.fromDate.localeCompare(a.fromDate)).map(it => ({
+    meeting_date: it.fromDate, task: it.task, owner: it.owner || "", due: it.due || "", due_date: validIso(it.due_date) ? it.due_date : "",
+    priority: it.priority, status: STATUS_LABEL[it.status] || it.status, overdue: isOverdue(it, today) ? "OVERDUE" : "", note: it.note || "", item_id: it.id
+  }));
+}
+
+async function setItemStatus(itemId, status) {
+  if (current?.isDemo) {
+    const it = current.demoTracker.find(x => x.id === itemId); if (it) it.status = status;
+    const f = current.follow.find(x => x.item_id === itemId); if (f) f.status = status;
+    renderFollow(); renderDigest(); return;
+  }
+  const meetingId = String(itemId).split("-")[0];
+  const m = Store.get(meetingId); if (!m) return;
+  const it = m.action_items.find(x => x.id === itemId); if (!it) return;
+  it.manual_status = status; it.manual_date = isoToday();
+  const f = current?.follow?.find(x => x.item_id === itemId); if (f) f.status = status;
+  await Store.saveMeeting(m);
+  if (current) renderFollow();
+  refreshAfterDataChange();
+}
+
+/* ======================================================================
+   Claude prompt
+   ====================================================================== */
+function buildSystemPrompt(meetingDate, openItems) {
   const c = cfg();
   const context = [];
   if (profile.org) context.push(`Organization: ${profile.org}.`);
   if (c.guidance) context.push(c.guidance);
   context.push(`These notes usually come from: ${profile.meeting.toLowerCase()}. The people involved are mostly ${c.people}.`);
-  if (profile.focus.length) context.push(`The organization asked you to watch most closely for: ${profile.focus.map(f => FOCUS[f].toLowerCase()).join("; ")}. Make sure no item in these areas is missed, and lean toward high priority for them.`);
+  if (profile.focus.length) context.push(`The organization asked you to watch most closely for: ${profile.focus.map(f => FOCUS[f].toLowerCase()).join("; ")}. Make sure no item in these areas is missed, and lean toward higher priority for them.`);
+  if (Store.people.length) context.push(`Known team members (use these spellings when a name clearly matches): ${Store.people.map(p => p.name).join(", ")}.`);
 
-  let followBlock = "", followKey = "";
-  if (previous && previous.action_items.length) {
-    const list = previous.action_items.map((it, i) =>
-      `[${i + 1}] ${it.task} | owner: ${it.owner || "unassigned"} | due: ${it.due_date || it.due || "none"}`).join("\n");
-    followBlock = `
-
-Action items from the previous meeting on ${previous.meetingDate}. Check each one against today's notes:
-${list}`;
-    followKey = `,
-  "follow_ups": [ { "id": number, "status": "done" | "in_progress" | "blocked" | "not_mentioned", "note": string or null } ]`;
+  let followBlock = "", followKey = "", followRules = "";
+  if (openItems.length) {
+    followBlock = `\n\nOpen action items from earlier meetings. Check each one against today's notes:\n` +
+      openItems.map((it, i) => `[${i + 1}] ${it.task} | owner: ${it.owner || "unassigned"} | due: ${it.due_date || it.due || "none"} | assigned ${it.fromDate}`).join("\n");
+    followKey = `,\n  "follow_ups": [ { "id": number, "status": "done" | "in_progress" | "blocked" | "not_mentioned", "note": string or null } ]`;
+    followRules = `
+- follow_ups must include every id from the earlier list. Use "done" only if the notes say it was finished, "blocked" if something is stopping it, "in_progress" if work was reported, and "not_mentioned" if the notes say nothing about it. Keep "note" to one short sentence, or null.
+- Do not repeat an earlier item as a new action item unless the notes assign new or changed work for it.`;
   }
 
-  return `You turn raw meeting notes into a clear, structured record for a team.
+  return `You turn meeting notes and/or a meeting transcript into a clear, structured record for a team.
 
 About this team:
 ${context.join("\n")}
@@ -596,134 +997,79 @@ This meeting took place on ${meetingDate} (a ${weekday(meetingDate)}).${followBl
 Return ONLY a JSON object, no prose and no code fences, with exactly these keys:
 {
   "summary": string (2-3 sentences, plain language, using the team's own terms),
-  "action_items": [ { "task": string, "owner": string or null, "due": string or null, "due_date": "YYYY-MM-DD" or null, "priority": "high" | "medium" | "low" } ],
+  "action_items": [ { "task": string, "owner": string or null, "due": string or null, "due_date": "YYYY-MM-DD" or null, "priority": "urgent" | "high" | "medium" | "low" } ],
   "decisions": [ string ],
   "open_questions": [ string ]${followKey}
 }
 Rules:
+- Write everything in English, even if the notes or transcript are in another language.
 - Only include tasks someone needs to do after the meeting. Write each as a clear, specific instruction.
-- Use the owner's name exactly as written. If nobody took the task, owner is null. Never guess an owner.
-- "due" keeps the wording from the notes ("Thursday", "the 30th"). "due_date" converts it to a calendar date using the meeting date, or null if it is vague ("soon", "ongoing") or missing.
-- Priority: high = urgent, safety, compliance, or blocks other work; low = nice to have; otherwise medium.
+- Use the owner's name as written. If nobody clearly took the task, owner is null. Never guess an owner.
+- A transcript comes from automatic speech recognition: it has no speaker labels and may mishear words or names. Only assign an owner when a name is said together with the task ("Maria will call the landlord"). Fix obvious mis-hearings when the meaning is clear.
+- "due" keeps the wording used ("Thursday", "the 30th"). "due_date" converts it to a calendar date using the meeting date, or null if vague ("soon", "ongoing") or missing.
+- Priority: urgent = safety risk, or must happen within about two days or something serious fails; high = important or blocks other work; low = nice to have; otherwise medium.
 - Decisions are things the group agreed on. Open questions are unresolved items, including tasks with no owner.
-- If the notes contain no action items, return an empty array.${followKey ? `
-- follow_ups must include every id from the previous meeting's list. Use "done" only if the notes say it was finished, "blocked" if something is stopping it, "in_progress" if work was reported, and "not_mentioned" if the notes say nothing about it. Keep "note" to one short sentence, or null.
-- Do not repeat a previous item as a new action item unless the notes assign new or changed work for it.` : ""}`;
+- If there are no action items, return an empty array.${followRules}`;
 }
 
-/* ---------- Results ---------- */
+async function callClaude(key, system, userText, maxTokens = 3000) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: "user", content: userText }] })
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body?.error?.message || `API error (${res.status})`);
+  return (body.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+}
 function parseJson(text) {
   const start = text.indexOf("{"), end = text.lastIndexOf("}");
   if (start === -1 || end === -1) throw new Error("Claude didn't return JSON. Try again.");
   return JSON.parse(text.slice(start, end + 1));
 }
 
-/* Overdue is decided here, not by the model: not done + had a due date + that date is before this meeting */
-function withOverdue(f, meetingDate) {
-  const overdue = f.status !== "done" && f.due_date && f.due_date < meetingDate;
-  return { ...f, overdue };
-}
-
-const STATUS_LABEL = { done: "Done", in_progress: "In progress", blocked: "Blocked", not_mentioned: "Not mentioned" };
-
-function render(result, meetingDate, follow, isDemo, previousDate) {
-  current = { result, meetingDate, follow: follow.map(f => withOverdue(f, meetingDate)), isDemo };
-  $("demoBadge").hidden = !isDemo;
-  $("summary").textContent = result.summary || "";
-
-  // Follow-ups
-  $("followSection").hidden = current.follow.length === 0;
-  if (current.follow.length) {
-    const overdueCount = current.follow.filter(f => f.overdue).length;
-    const doneCount = current.follow.filter(f => f.status === "done").length;
-    $("followFrom").textContent = `— ${previousDate ? prettyDate(previousDate) + " · " : ""}${doneCount} of ${current.follow.length} done${overdueCount ? `, ${overdueCount} overdue` : ""}`;
-    const order = (f) => f.overdue ? 0 : f.status === "blocked" ? 1 : f.status === "done" ? 3 : 2;
-    $("follow").innerHTML = [...current.follow].sort((a, b) => order(a) - order(b)).map(f => {
-      const status = STATUS_LABEL[f.status] || "Not mentioned";
-      const pill = f.overdue
-        ? `<span class="pill s-overdue">Overdue</span> <span class="note">${escapeHtml(status.toLowerCase())}</span>`
-        : `<span class="pill s-${f.status}">${status}</span>`;
-      return `<tr>
-        <td>${escapeHtml(f.task)}${f.note ? `<span class="due-date">${escapeHtml(f.note)}</span>` : ""}</td>
-        <td>${f.owner ? escapeHtml(f.owner) : '<span class="unassigned">Unassigned</span>'}</td>
-        <td>${f.due_date ? escapeHtml(prettyDate(f.due_date)) : (f.due ? escapeHtml(f.due) : '<span class="unassigned">—</span>')}</td>
-        <td>${pill}</td>
-      </tr>`;
-    }).join("");
-  }
-
-  // Action items
-  const items = result.action_items || [];
-  $("items").innerHTML = items.length
-    ? items.map((it, i) => {
-        const p = ["high", "medium", "low"].includes(it.priority) ? it.priority : "medium";
-        const dueCell = it.due
-          ? `${escapeHtml(it.due)}${it.due_date && prettyDate(it.due_date) && prettyDate(it.due_date) !== it.due ? `<span class="due-date">${escapeHtml(prettyDate(it.due_date))}</span>` : ""}`
-          : (it.due_date ? escapeHtml(prettyDate(it.due_date)) : '<span class="unassigned">—</span>');
-        return `<tr>
-          <td>${i + 1}</td>
-          <td>${escapeHtml(it.task)}</td>
-          <td>${it.owner ? escapeHtml(it.owner) : '<span class="unassigned">Unassigned</span>'}</td>
-          <td>${dueCell}</td>
-          <td><span class="pill p-${p}">${p}</span></td>
-        </tr>`;
-      }).join("")
-    : '<tr><td colspan="5" class="unassigned">No action items found.</td></tr>';
-
-  const list = (arr) => (arr && arr.length) ? arr.map(x => `<li>${escapeHtml(x)}</li>`).join("") : '<li class="unassigned">None</li>';
-  $("decisions").innerHTML = list(result.decisions);
-  $("questions").innerHTML = list(result.open_questions);
-
-  renderOwners();
-  $("exportHelp").textContent = "";
-  $("results").hidden = false; $("sendPanel").hidden = false;
-  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
+/* ======================================================================
+   Extract
+   ====================================================================== */
 async function extract() {
   const key = $("key").value.trim();
   const notes = $("notes").value.trim();
+  const transcript = $("transcript").value.trim();
   const meetingDate = $("meetingDate").value || isoToday();
   if (!key) return setStatus("Add your Claude API key first, or try the demo result.", true);
-  if (!notes) return setStatus("Paste some meeting notes first.", true);
-  const previous = selectedPrevious();
+  if (!notes && !transcript) return setStatus("Type some notes or record the meeting first.", true);
+  if (Recorder.active) Recorder.stop();
+
+  const openItems = $("checkOpen").checked
+    ? trackerItems(null).filter(isOpen).sort((a, b) => b.fromDate.localeCompare(a.fromDate)).slice(0, 40)
+    : [];
+
+  const parts = [];
+  if (notes) parts.push(`Typed notes:\n\n${notes}`);
+  if (transcript) parts.push(`Transcript (automatic speech recognition):\n\n${transcript}`);
 
   $("run").disabled = true;
-  setStatus(previous ? "Reading your notes and checking last meeting's items…" : "Reading your notes…");
+  setStatus(openItems.length ? `Reading your ${transcript ? "notes and transcript" : "notes"} and checking ${openItems.length} open items…` : "Reading your notes…");
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true"
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 3000,
-        system: buildSystemPrompt(meetingDate, previous),
-        messages: [{ role: "user", content: `Meeting notes:\n\n${notes}` }]
+    const result = parseJson(await callClaude(key, buildSystemPrompt(meetingDate, openItems), parts.join("\n\n---\n\n")));
+    const id = Date.now();
+    const followRaw = new Map((result.follow_ups || []).map(f => [Number(f.id), f]));
+    const meeting = migrateMeeting({
+      id, profile: profileKey(), meetingDate, savedAt: new Date().toISOString(),
+      summary: result.summary || "", decisions: result.decisions || [], open_questions: result.open_questions || [],
+      action_items: (result.action_items || []).map((it, i) => ({
+        id: `${id}-${i}`, task: it.task, owner: it.owner || null, due: it.due || null,
+        due_date: validIso(it.due_date) ? it.due_date : null, priority: normPriority(it.priority)
+      })),
+      follow_ups: openItems.map((it, i) => {
+        const f = followRaw.get(i + 1) || {};
+        return { item_id: it.id, status: STATUS_LABEL[f.status] && f.status !== "open" ? f.status : "not_mentioned", note: f.note || null };
       })
     });
-    const body = await res.json();
-    if (!res.ok) throw new Error(body?.error?.message || `API error (${res.status})`);
-    const text = (body.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-    const result = parseJson(text);
-
-    let follow = [];
-    if (previous) {
-      const byId = new Map((result.follow_ups || []).map(f => [Number(f.id), f]));
-      follow = previous.action_items.map((it, i) => {
-        const f = byId.get(i + 1) || {};
-        const status = STATUS_LABEL[f.status] ? f.status : "not_mentioned";
-        return { task: it.task, owner: it.owner, due: it.due, due_date: it.due_date, status, note: f.note || null };
-      });
-    }
-    render(result, meetingDate, follow, false, previous?.meetingDate);
-    const saved = saveToHistory(result, meetingDate);
-    refreshHistoryUI();
-    setStatus(`Done — ${result.action_items?.length || 0} action items found.` + (saved ? " Saved for next meeting's check-in." : ""));
+    await Store.saveMeeting(meeting);
+    showMeeting(meeting, false);
+    refreshAfterDataChange();
+    setStatus(`Done — ${meeting.action_items.length} action items found. Saved${Sync.on() && Sync.state === "ok" ? " to the team sheet" : " for next meeting's check-in"}.`);
   } catch (err) {
     setStatus(err.message || "Something went wrong.", true);
   } finally {
@@ -731,87 +1077,205 @@ async function extract() {
   }
 }
 
-function showDemo() {
-  const key = typeKeyForSamples();
-  const meetingDate = $("meetingDate").value || isoToday();
-  const demo = ORG_TYPES[key].demo;
-  const follow = (DEMO_FOLLOW[key] || []).map(f => ({ task: f.task, owner: f.owner, due: null, due_date: addDays(meetingDate, f.due_in), status: f.status, note: f.note }));
-  $("notes").value = sampleNotes();
-  render(demo, meetingDate, follow, true, addDays(meetingDate, -7));
-  setStatus("Showing a saved example result. Demo results aren't saved.");
+/* Build the "current" view model from a saved meeting (or demo) and render */
+function showMeeting(meeting, isDemo, demoTracker) {
+  let follow = [];
+  if (isDemo) {
+    follow = demoTracker.filter(it => it.isFollow).map(it => ({ ...it, item_id: it.id }));
+  } else {
+    const earlier = new Map(trackerItems(meeting.id).map(it => [it.id, it]));
+    // Show status as of this meeting, plus any manual change made since
+    follow = meeting.follow_ups.map(f => {
+      const base = earlier.get(f.item_id); if (!base) return null;
+      const item = Store.get(String(f.item_id).split("-")[0])?.action_items.find(x => x.id === f.item_id) || {};
+      const status = item.manual_status && (item.manual_date || "") >= meeting.meetingDate ? item.manual_status : f.status;
+      return { item_id: f.item_id, task: base.task, owner: base.owner, due: base.due, due_date: base.due_date, status, note: f.note };
+    }).filter(Boolean);
+  }
+  current = { meetingId: isDemo ? null : meeting.id, result: meeting, meetingDate: meeting.meetingDate, follow, isDemo, demoTracker: demoTracker || null };
+  render();
 }
 
-/* ---------- Email each owner ---------- */
+/* ======================================================================
+   Render results (editable)
+   ====================================================================== */
+function priorityRank(p) { return PRIORITY_RANK[normPriority(p)]; }
+
+function render() {
+  const r = current.result;
+  $("demoBadge").hidden = !current.isDemo;
+  $("summary").textContent = r.summary || "";
+  renderFollow();
+  renderItems();
+  const list = (arr) => (arr && arr.length) ? arr.map(x => `<li>${escapeHtml(x)}</li>`).join("") : '<li class="unassigned">None</li>';
+  $("decisions").innerHTML = list(r.decisions);
+  $("questions").innerHTML = list(r.open_questions);
+  renderOwners();
+  $("exportHelp").textContent = "";
+  $("results").hidden = false; $("sendPanel").hidden = false;
+  renderDigest();
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function statusSelect(itemId, status) {
+  const opts = (status === "not_mentioned" ? ["not_mentioned", ...MANUAL_STATUSES] : MANUAL_STATUSES);
+  return `<select class="s-${status}" data-status-item="${escapeHtml(itemId)}" aria-label="Status">${opts.map(s => `<option value="${s}" ${s === status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}</select>`;
+}
+
+function renderFollow() {
+  const md = current.meetingDate;
+  const follow = current.follow;
+  $("followSection").hidden = follow.length === 0;
+  if (!follow.length) return;
+  const overdue = follow.filter(f => isOverdue(f, md)).length;
+  const done = follow.filter(f => f.status === "done").length;
+  $("followFrom").textContent = `— ${done} of ${follow.length} done${overdue ? `, ${overdue} overdue` : ""}`;
+  const order = (f) => isOverdue(f, md) ? 0 : f.status === "blocked" ? 1 : !isOpen(f) ? 3 : 2;
+  $("follow").innerHTML = [...follow].sort((a, b) => order(a) - order(b)).map(f => `<tr>
+      <td>${escapeHtml(f.task)}${isOverdue(f, md) ? '<span class="overdue-tag">Overdue</span>' : ""}${f.note ? `<span class="sub">${escapeHtml(f.note)}</span>` : ""}</td>
+      <td>${f.owner ? escapeHtml(f.owner) : '<span class="unassigned">Unassigned</span>'}</td>
+      <td>${validIso(f.due_date) ? escapeHtml(prettyDate(f.due_date)) : (f.due ? escapeHtml(f.due) : '<span class="unassigned">—</span>')}</td>
+      <td>${statusSelect(f.item_id, f.status)}</td>
+    </tr>`).join("");
+}
+
+function renderItems() {
+  const items = current.result.action_items || [];
+  const sorted = items.map((it, i) => ({ it, i })).sort((a, b) => priorityRank(a.it.priority) - priorityRank(b.it.priority) || a.i - b.i);
+  $("items").innerHTML = sorted.length
+    ? sorted.map(({ it, i }, n) => {
+        const p = normPriority(it.priority);
+        const dueCell = it.due
+          ? `${escapeHtml(it.due)}${validIso(it.due_date) && prettyDate(it.due_date) !== it.due ? `<span class="sub">${escapeHtml(prettyDate(it.due_date))}</span>` : ""}`
+          : (validIso(it.due_date) ? escapeHtml(prettyDate(it.due_date)) : '<span class="unassigned">—</span>');
+        return `<tr>
+          <td>${n + 1}</td>
+          <td>${escapeHtml(it.task)}</td>
+          <td><input type="text" list="peopleList" data-owner-i="${i}" value="${escapeHtml(it.owner || "")}" placeholder="Unassigned" aria-label="Owner" style="min-width:110px"></td>
+          <td>${dueCell}</td>
+          <td><select class="p-${p}" data-priority-i="${i}" aria-label="Priority">${PRIORITIES.map(x => `<option value="${x}" ${x === p ? "selected" : ""}>${x}</option>`).join("")}</select></td>
+        </tr>`;
+      }).join("")
+    : '<tr><td colspan="5" class="unassigned">No action items found.</td></tr>';
+}
+
+/* Edits: priority, owner, status → update everywhere and re-save */
+async function persistCurrent() {
+  if (current.isDemo || !current.meetingId) return;
+  await Store.saveMeeting(current.result);
+}
+$("items").addEventListener("change", async (e) => {
+  const pi = e.target.dataset.priorityI, oi = e.target.dataset.ownerI;
+  if (pi !== undefined) {
+    current.result.action_items[Number(pi)].priority = e.target.value;
+    renderItems();
+    setStatus(`Priority changed to ${e.target.value}. Emails, exports${current.isDemo ? "" : " and saved history"} are updated.`);
+  } else if (oi !== undefined) {
+    current.result.action_items[Number(oi)].owner = e.target.value.trim() || null;
+    setStatus(`Owner updated. Emails, exports${current.isDemo ? "" : " and saved history"} are updated.`);
+  } else return;
+  renderOwners(); renderDigest();
+  await persistCurrent();
+});
+document.addEventListener("change", (e) => {
+  const id = e.target.dataset?.statusItem; if (!id) return;
+  e.target.className = `s-${e.target.value}`;
+  setItemStatus(id, e.target.value);
+});
+
+/* ======================================================================
+   Emails (with translation)
+   ====================================================================== */
 function ownerTasks() {
-  // owner name -> { items: [...new action items], open: [...unfinished follow-ups] }
   const map = new Map();
   const add = (name, kind, item) => {
     const k = name.toLowerCase();
     if (!map.has(k)) map.set(k, { name, items: [], open: [] });
     map.get(k)[kind].push(item);
   };
-  (current.result.action_items || []).forEach(it => splitOwners(it.owner).forEach(n => add(n, "items", it)));
-  current.follow.filter(f => f.status !== "done").forEach(f => splitOwners(f.owner).forEach(n => add(n, "open", f)));
+  [...(current.result.action_items || [])].sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority))
+    .forEach(it => splitOwners(it.owner).forEach(n => add(n, "items", it)));
+  current.follow.filter(isOpen).forEach(f => splitOwners(f.owner).forEach(n => add(n, "open", f)));
   return [...map.values()];
 }
 function renderOwners() {
-  const roster = readStore(ROSTER_KEY, {});
   const owners = ownerTasks();
   $("owners").innerHTML = owners.length
     ? owners.map((o, i) => {
+        const p = Store.findPerson(o.name) || {};
         const count = o.items.length + o.open.length;
         return `<div class="owner-row">
           <div class="owner-name">${escapeHtml(o.name)} <span class="owner-count">· ${count} task${count > 1 ? "s" : ""}</span></div>
-          <input type="email" data-owner="${escapeHtml(o.name.toLowerCase())}" placeholder="email (optional)" value="${escapeHtml(roster[o.name.toLowerCase()] || "")}">
+          <input type="email" data-owner-email="${escapeHtml(o.name)}" placeholder="email (optional)" value="${escapeHtml(p.email || "")}" aria-label="${escapeHtml(o.name)} email">
+          <select data-owner-lang="${escapeHtml(o.name)}" aria-label="${escapeHtml(o.name)} language">${langOptions(p.language)}</select>
           <button class="small" data-email="${i}">Email</button>
         </div>`;
       }).join("")
     : '<p class="unassigned" style="margin:0">No tasks have an owner yet.</p>';
-  $("owners").querySelectorAll("input[data-owner]").forEach(inp => inp.addEventListener("change", () => {
-    const r = readStore(ROSTER_KEY, {});
-    const v = inp.value.trim();
-    if (v) r[inp.dataset.owner] = v; else delete r[inp.dataset.owner];
-    writeStore(ROSTER_KEY, r);
-  }));
-  $("owners").querySelectorAll("button[data-email]").forEach(btn => btn.addEventListener("click", () => emailOwner(owners[Number(btn.dataset.email)])));
 }
-function dueText(it) {
-  if (it.due_date && prettyDate(it.due_date)) return ` (due ${prettyDate(it.due_date)})`;
-  return it.due ? ` (due ${it.due})` : "";
-}
+$("owners").addEventListener("change", (e) => {
+  if (e.target.dataset.ownerEmail) upsertPerson(e.target.dataset.ownerEmail, { email: e.target.value.trim() });
+  if (e.target.dataset.ownerLang) upsertPerson(e.target.dataset.ownerLang, { language: e.target.value });
+});
+$("owners").addEventListener("click", (e) => {
+  const i = e.target.dataset.email; if (i === undefined) return;
+  emailOwner(ownerTasks()[Number(i)], e.target);
+});
+
 function openMail(to, subject, body) {
-  const url = `mailto:${encodeURIComponent(to || "").replace(/%2C/g, ",").replace(/%40/g, "@")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = url;
+  const enc = (s) => encodeURIComponent(s);
+  window.location.href = `mailto:${(to || "").split(",").map(x => enc(x.trim())).join(",").replace(/%40/g, "@")}?subject=${enc(subject)}&body=${enc(body)}`;
 }
 function meetingLabel() {
   return `${profile.org ? profile.org + " " : ""}${meetingName()} on ${prettyDate(current.meetingDate) || current.meetingDate}`;
 }
-function emailOwner(o) {
-  const roster = readStore(ROSTER_KEY, {});
+function ownerEmail(o) {
   const first = o.name.split(" ")[0];
   const lines = [`Hi ${first},`, "", `Here are your action items from the ${meetingLabel()}:`, ""];
-  o.items.forEach((it, i) => lines.push(`${i + 1}. ${it.task}${dueText(it)}`));
+  o.items.forEach((it, i) => lines.push(`${i + 1}. ${it.task}${dueText(it)}${["urgent", "high"].includes(it.priority) ? ` [${it.priority.toUpperCase()}]` : ""}`));
   if (o.open.length) {
-    lines.push("", "Still open from last meeting:");
-    o.open.forEach(f => lines.push(`- ${f.task}${f.overdue ? " (OVERDUE)" : ""}${f.note ? ` — ${f.note}` : ""}`));
+    lines.push("", "Still open from earlier meetings:");
+    o.open.forEach(f => lines.push(`- ${f.task}${isOverdue(f, current.meetingDate) ? " (OVERDUE)" : ""}${f.note ? ` — ${f.note}` : ""}`));
   }
   lines.push("", "Let me know if anything here doesn't look right.", "", "Thanks!");
-  openMail(roster[o.name.toLowerCase()], `Your action items from the ${meetingLabel()}`, lines.join("\n"));
+  return { subject: `Your action items from the ${meetingLabel()}`, body: lines.join("\n") };
 }
-function emailAll() {
-  const roster = readStore(ROSTER_KEY, {});
-  const to = [...new Set(ownerTasks().map(o => roster[o.name.toLowerCase()]).filter(Boolean))].join(",");
+async function translateEmail(email, language) {
+  const key = $("key").value.trim();
+  if (!key) throw new Error(`Add your API key above to translate into ${language}, or set this person's language to English.`);
+  const system = `Translate the email the user gives you into ${language}. Keep it warm, plain and natural for a volunteer or staff member. Keep people's names, dates and numbers exactly right. Translate the words OVERDUE, URGENT and HIGH too. Return ONLY JSON: {"subject": string, "body": string}`;
+  const out = parseJson(await callClaude(key, system, `Subject: ${email.subject}\n\n${email.body}`, 2000));
+  if (!out.subject || !out.body) throw new Error("Translation came back incomplete. Try again.");
+  return out;
+}
+async function emailOwner(o, btn) {
+  const p = Store.findPerson(o.name) || {};
+  let email = ownerEmail(o);
+  if (p.language && p.language !== "English") {
+    btn.disabled = true; setStatus(`Translating ${o.name}'s email into ${p.language}…`);
+    try { email = await translateEmail(email, p.language); setStatus(`Opened ${o.name}'s email in ${p.language}.`); }
+    catch (e) { setStatus(e.message, true); btn.disabled = false; return; }
+    btn.disabled = false;
+  }
+  openMail(p.email, email.subject, email.body);
+}
+$("emailAll").addEventListener("click", () => {
+  if (!current) return;
+  const to = [...new Set(ownerTasks().map(o => Store.findPerson(o.name)?.email).concat(Store.lead().map(p => p.email)).filter(Boolean))].join(",");
   openMail(to, `Recap: ${meetingLabel()}`, toPlainRecap());
-}
+});
 
-/* ---------- Exports ---------- */
+/* ======================================================================
+   Exports
+   ====================================================================== */
+function sortedItems() { return [...(current.result.action_items || [])].sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority)); }
 function toPlainRecap() {
   const r = current.result;
   const lines = [`Recap of the ${meetingLabel()}`, "", r.summary || "", "", "ACTION ITEMS"];
-  (r.action_items || []).forEach((it, i) => lines.push(`${i + 1}. ${it.task} — ${it.owner || "Unassigned"}${dueText(it)}`));
+  sortedItems().forEach((it, i) => lines.push(`${i + 1}. [${normPriority(it.priority).toUpperCase()}] ${it.task} — ${it.owner || "Unassigned"}${dueText(it)}`));
   if (current.follow.length) {
-    lines.push("", "FROM LAST MEETING");
-    current.follow.forEach(f => lines.push(`- ${f.task} — ${f.owner || "Unassigned"}: ${f.overdue ? "OVERDUE, " : ""}${(STATUS_LABEL[f.status] || "").toLowerCase()}`));
+    lines.push("", "FROM EARLIER MEETINGS");
+    current.follow.forEach(f => lines.push(`- ${f.task} — ${f.owner || "Unassigned"}: ${isOverdue(f, current.meetingDate) ? "OVERDUE, " : ""}${(STATUS_LABEL[f.status] || "").toLowerCase()}`));
   }
   if ((r.decisions || []).length) { lines.push("", "DECISIONS"); r.decisions.forEach(d => lines.push(`- ${d}`)); }
   if ((r.open_questions || []).length) { lines.push("", "OPEN QUESTIONS"); r.open_questions.forEach(q => lines.push(`- ${q}`)); }
@@ -822,19 +1286,17 @@ function toMarkdown() {
   const cell = (s) => String(s ?? "").replace(/\|/g, "\\|");
   const lines = [`## ${profile.org ? profile.org + ": " : ""}${meetingName()} recap, ${prettyDate(current.meetingDate)}`, "", r.summary || ""];
   if (current.follow.length) {
-    lines.push("", "### From last meeting", "", "| Task | Owner | Status |", "|---|---|---|");
-    current.follow.forEach(f => lines.push(`| ${cell(f.task)} | ${cell(f.owner || "Unassigned")} | ${f.overdue ? "**Overdue**, " : ""}${STATUS_LABEL[f.status]} |`));
+    lines.push("", "### From earlier meetings", "", "| Task | Owner | Status |", "|---|---|---|");
+    current.follow.forEach(f => lines.push(`| ${cell(f.task)} | ${cell(f.owner || "Unassigned")} | ${isOverdue(f, current.meetingDate) ? "**Overdue**, " : ""}${STATUS_LABEL[f.status]} |`));
   }
   lines.push("", "### Action items", "", "| # | Task | Owner | Due | Priority |", "|---|---|---|---|---|");
-  (r.action_items || []).forEach((it, i) =>
-    lines.push(`| ${i + 1} | ${cell(it.task)} | ${cell(it.owner || "Unassigned")} | ${cell(it.due || prettyDate(it.due_date) || "—")} | ${cell(it.priority)} |`));
+  sortedItems().forEach((it, i) => lines.push(`| ${i + 1} | ${cell(it.task)} | ${cell(it.owner || "Unassigned")} | ${cell(it.due || prettyDate(it.due_date) || "—")} | ${cell(it.priority)} |`));
   lines.push("", "### Decisions", "", ...((r.decisions || []).length ? r.decisions.map(x => `- ${x}`) : ["- None"]));
   lines.push("", "### Open questions", "", ...((r.open_questions || []).length ? r.open_questions.map(x => `- ${x}`) : ["- None"]));
   return lines.join("\n");
 }
 function rows() {
-  return (current.result.action_items || []).map((it, i) =>
-    [i + 1, it.task, it.owner || "Unassigned", it.due || "", it.due_date || "", it.priority || "medium"]);
+  return sortedItems().map((it, i) => [i + 1, it.task, it.owner || "Unassigned", it.due || "", validIso(it.due_date) ? it.due_date : "", normPriority(it.priority)]);
 }
 function toCsv(header, data) {
   const q = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
@@ -846,37 +1308,18 @@ function download(name, text, type = "text/csv") {
   a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
-function fileSlug() {
-  const base = (profile.org || "meeting").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "meeting";
-  return `${base}-${current.meetingDate}`;
-}
+function orgSlug() { return (profile.org || "meeting").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "meeting"; }
+function fileSlug() { return `${orgSlug()}-${current.meetingDate}`; }
 async function copyText(text, okMsg) {
   try { await navigator.clipboard.writeText(text); setStatus(okMsg); return true; }
   catch { setStatus("Couldn't copy — your browser blocked clipboard access.", true); return false; }
 }
-function usDate(iso) { if (!iso) return ""; const [y, m, d] = iso.split("-"); return `${m}/${d}/${y}`; }
-
-/* ---------- Wire up ---------- */
-buildSetup();
-$("saveSetup").addEventListener("click", () => finishSetup(false));
-$("skipSetup").addEventListener("click", () => finishSetup(true));
-$("editSetup").addEventListener("click", showSetup);
-$("run").addEventListener("click", extract);
-$("sample").addEventListener("click", () => { $("notes").value = sampleNotes(); setStatus("Sample notes loaded."); });
-$("demo").addEventListener("click", showDemo);
-$("clearHistory").addEventListener("click", () => {
-  if (!confirm("Delete all saved meetings for this organization from this browser?")) return;
-  writeStore(HISTORY_KEY, readStore(HISTORY_KEY, []).filter(h => h.profile !== profileKey()));
-  refreshHistoryUI(); setStatus("Saved meetings cleared.");
-});
+function usDate(iso) { if (!validIso(iso)) return ""; const [y, m, d] = iso.split("-"); return `${m}/${d}/${y}`; }
 
 $("copyMd").addEventListener("click", () => current && copyText(toMarkdown(), "Recap copied as Markdown — paste into email, Slack or a doc."));
-$("emailAll").addEventListener("click", () => current && emailAll());
-
 $("copySheets").addEventListener("click", async () => {
   if (!current) return;
-  const tsv = [["#", "Task", "Owner", "Due", "Due date", "Priority"], ...rows()]
-    .map(r => r.map(c => String(c).replace(/[\t\n]/g, " ")).join("\t")).join("\n");
+  const tsv = [["#", "Task", "Owner", "Due", "Due date", "Priority"], ...rows()].map(r => r.map(c => String(c).replace(/[\t\n]/g, " ")).join("\t")).join("\n");
   if (await copyText(tsv, "Copied. Click a cell in Google Sheets or Excel and paste."))
     $("exportHelp").textContent = "Click cell A1 in a sheet and paste. Each item lands in its own row with separate columns.";
 });
@@ -887,39 +1330,219 @@ $("csv").addEventListener("click", () => {
 });
 $("asanaCsv").addEventListener("click", () => {
   if (!current) return;
-  const roster = readStore(ROSTER_KEY, {});
-  const data = (current.result.action_items || []).map(it => {
+  const data = sortedItems().map(it => {
     const owners = splitOwners(it.owner);
-    const email = owners.length === 1 ? (roster[owners[0].toLowerCase()] || "") : "";
-    const desc = `Owner: ${it.owner || "Unassigned"}. Priority: ${it.priority}. From the ${meetingLabel()}.`;
-    return [it.task, desc, email, usDate(it.due_date)];
+    const email = owners.length === 1 ? (Store.findPerson(owners[0])?.email || "") : "";
+    return [it.task, `Owner: ${it.owner || "Unassigned"}. Priority: ${normPriority(it.priority)}. From the ${meetingLabel()}.`, email, usDate(it.due_date)];
   });
   download(`${fileSlug()}-asana-import.csv`, toCsv(["Name", "Description", "Assignee", "Due Date"], data));
   $("exportHelp").textContent = "In Asana, open your project → the arrow next to its name → Import → CSV, and pick this file. Assignees fill in for owners whose email you entered.";
 });
 $("copyTrello").addEventListener("click", async () => {
   if (!current) return;
-  const lines = (current.result.action_items || []).map(it => `${it.task} — ${it.owner || "Unassigned"}${dueText(it)}`);
+  const lines = sortedItems().map(it => `${["urgent", "high"].includes(it.priority) ? `[${it.priority.toUpperCase()}] ` : ""}${it.task} — ${it.owner || "Unassigned"}${dueText(it)}`);
   if (await copyText(lines.join("\n"), "Copied as Trello cards."))
     $("exportHelp").textContent = "In Trello, click \"Add a card\" on a list and paste. Trello will offer to create one card per line.";
 });
-$("shareLink").addEventListener("click", async () => {
+
+/* ======================================================================
+   Weekly overdue digest
+   ====================================================================== */
+function digestData() {
+  const asOf = isoToday();
+  const all = current?.isDemo ? current.demoTracker : trackerItems(null);
+  const open = all.filter(isOpen);
+  const overdue = open.filter(it => isOverdue(it, asOf)).sort((a, b) => a.due_date.localeCompare(b.due_date));
+  const weekEnd = addDays(asOf, 7);
+  const dueSoon = open.filter(it => validIso(it.due_date) && it.due_date >= asOf && it.due_date <= weekEnd).sort((a, b) => a.due_date.localeCompare(b.due_date));
+  const blocked = open.filter(it => it.status === "blocked" && !overdue.includes(it));
+  return { asOf, open, overdue, dueSoon, blocked, isDemo: !!current?.isDemo };
+}
+function renderDigest() {
+  const d = digestData();
+  const hasHistory = d.isDemo || Store.mine().length > 0;
+  $("digestPanel").hidden = !hasHistory;
+  if (!hasHistory) return;
+  $("digestDemo").hidden = !d.isDemo;
+  $("digestAsOf").textContent = `as of ${prettyDate(d.asOf)}${d.isDemo ? "" : ` · ${Store.mine().length} meeting${Store.mine().length === 1 ? "" : "s"}`}`;
+  $("digestStats").innerHTML = `
+    <div class="stat ${d.overdue.length ? "bad" : ""}"><b>${d.overdue.length}</b><span>overdue</span></div>
+    <div class="stat"><b>${d.dueSoon.length}</b><span>due in the next 7 days</span></div>
+    <div class="stat"><b>${d.blocked.length}</b><span>blocked</span></div>
+    <div class="stat"><b>${d.open.length}</b><span>open in total</span></div>`;
+  const row = (it, showOverdue) => `<tr>
+      <td>${escapeHtml(it.task)}${showOverdue ? '<span class="overdue-tag">Overdue</span>' : ""}${it.note ? `<span class="sub">${escapeHtml(it.note)}</span>` : ""}</td>
+      <td>${it.owner ? escapeHtml(it.owner) : '<span class="unassigned">Unassigned</span>'}</td>
+      <td>${escapeHtml(prettyDate(it.due_date) || it.due || "—")}<span class="sub">from ${escapeHtml(prettyDate(it.fromDate) || "")}</span></td>
+      <td>${statusSelect(it.id, it.status)}</td>
+    </tr>`;
+  const table = (title, list, showOverdue) => list.length ? `<h3 style="margin-top:14px">${title}</h3>
+      <div class="table-wrap"><table><thead><tr><th>Task</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>${list.map(it => row(it, showOverdue)).join("")}</tbody></table></div>` : "";
+  $("digestBody").innerHTML = (d.overdue.length || d.dueSoon.length || d.blocked.length)
+    ? table("Overdue", d.overdue, true) + table("Due in the next 7 days", d.dueSoon, false) + table("Blocked", d.blocked, false)
+    : '<p class="unassigned" style="margin:0">Nothing overdue, blocked or due this week. Nice.</p>';
+
+  const leads = Store.lead();
+  $("emailDigest").textContent = leads.length ? `Email digest to ${leads.map(p => p.name.split(" ")[0]).join(" & ")}` : "Email digest";
+  $("digestNote").innerHTML = Sync.on() && Sync.state !== "error"
+    ? "Your team sheet can send this automatically every Monday morning. See step 5 of the setup guide."
+    : leads.length
+      ? "Click Email digest each Monday, or add the calendar reminder. Connect a team sheet to have it sent automatically."
+      : 'Mark someone as <b>Team lead</b> under "Team &amp; shared history" to send them this digest.';
+}
+function digestText() {
+  const d = digestData();
+  const line = (it) => `- ${it.task} — ${it.owner || "Unassigned"} (due ${prettyDate(it.due_date) || it.due || "no date"}; assigned ${prettyDate(it.fromDate)})${it.note ? ` — ${it.note}` : ""}`;
+  const out = [`Weekly action item digest${profile.org ? ` for ${profile.org}` : ""} — ${prettyDate(d.asOf)}`, "",
+    `${d.overdue.length} overdue · ${d.dueSoon.length} due this week · ${d.blocked.length} blocked · ${d.open.length} open in total`];
+  if (d.overdue.length) { out.push("", "OVERDUE"); d.overdue.forEach(it => out.push(line(it))); }
+  if (d.dueSoon.length) { out.push("", "DUE IN THE NEXT 7 DAYS"); d.dueSoon.forEach(it => out.push(line(it))); }
+  if (d.blocked.length) { out.push("", "BLOCKED"); d.blocked.forEach(it => out.push(line(it))); }
+  if (!d.overdue.length && !d.dueSoon.length && !d.blocked.length) out.push("", "Nothing overdue, blocked or due this week.");
+  out.push("", `Open the tracker: ${shareUrl({ digest: "1" })}`);
+  return out.join("\n");
+}
+$("emailDigest").addEventListener("click", () => {
+  const to = Store.lead().map(p => p.email).join(",");
+  openMail(to, `Weekly action item digest${profile.org ? ` — ${profile.org}` : ""} (${prettyDate(isoToday())})`, digestText());
+});
+$("copyDigest").addEventListener("click", () => copyText(digestText(), "Digest copied."));
+$("icsDigest").addEventListener("click", () => {
+  // Next Monday at 9:00 local time, repeating weekly
+  const d = new Date(); d.setHours(9, 0, 0, 0);
+  const add = (8 - d.getDay()) % 7 || 7; d.setDate(d.getDate() + add);
+  const pad = (n) => String(n).padStart(2, "0");
+  const local = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T090000`;
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+  const url = shareUrl({ digest: "1" });
+  const esc = (s) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Meeting Action Items//EN", "BEGIN:VEVENT",
+    `UID:${Date.now()}@meeting-action-items`, `DTSTAMP:${stamp}`, `DTSTART:${local}`, "DURATION:PT15M", "RRULE:FREQ=WEEKLY;BYDAY=MO",
+    `SUMMARY:${esc(`Send weekly overdue digest${profile.org ? ` (${profile.org})` : ""}`)}`,
+    `DESCRIPTION:${esc(`Open the tracker and click "Email digest":\n${url}`)}`, `URL:${url}`,
+    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Weekly overdue digest", "TRIGGER:PT0M", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  download(`${orgSlug()}-monday-digest.ics`, ics, "text/calendar");
+  setStatus("Calendar reminder downloaded. Open it to add a Monday 9am reminder that links back here.");
+});
+
+/* ======================================================================
+   Demo mode
+   ====================================================================== */
+function showDemo() {
+  const key = typeKeyForSamples();
+  const meetingDate = $("meetingDate").value || isoToday();
+  const demo = ORG_TYPES[key].demo;
+  const meeting = { id: "demo", meetingDate, summary: demo.summary, decisions: demo.decisions, open_questions: demo.open_questions,
+    action_items: demo.action_items.map((it, i) => ({ ...it, id: `demo-${i}`, priority: normPriority(it.priority) })) };
+  const lastWeek = addDays(meetingDate, -7);
+  const tracker = [
+    ...(DEMO_FOLLOW[key] || []).map((f, i) => ({ id: `demo-f${i}`, task: f.task, owner: f.owner, due: null, due_date: addDays(meetingDate, f.due_in),
+        status: f.status, note: f.note, fromDate: lastWeek, priority: "medium", isFollow: true })),
+    ...meeting.action_items.map(it => ({ ...it, status: "open", note: null, fromDate: meetingDate }))
+  ];
+  $("notes").value = sampleNotes();
+  showMeeting(meeting, true, tracker);
+  setStatus("Showing a saved example result. Demo results aren't saved, and edits here are just for trying it out.");
+}
+
+/* ======================================================================
+   Backup import/export
+   ====================================================================== */
+$("exportBackup").addEventListener("click", () => {
+  const data = { app: "meeting-action-items", version: 2, exportedAt: new Date().toISOString(), profile, meetings: Store.mine(), people: Store.people };
+  download(`${orgSlug()}-meetings-backup-${isoToday()}.json`, JSON.stringify(data, null, 2), "application/json");
+  setStatus("Backup downloaded. Import it on another device or browser to carry your history over.");
+});
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", async () => {
+  const file = $("importFile").files[0]; if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.app !== "meeting-action-items" || !Array.isArray(data.meetings)) throw new Error("That file isn't a backup from this tool.");
+    const have = new Set(Store.meetings.map(m => String(m.id)));
+    const incoming = data.meetings.map(migrateMeeting).map(m => ({ ...m, profile: profileKey() })).filter(m => !have.has(String(m.id)));
+    Store.meetings = [...incoming, ...Store.meetings];
+    (data.people || []).forEach(p => { if (!Store.findPerson(p.name)) Store.people.push(p); });
+    Store.persistLocal();
+    if (incoming.length) await Sync.push({ action: "saveMeetings", meetings: incoming, tracker: trackerRows() });
+    await Sync.push({ action: "savePeople", people: Store.people });
+    refreshAfterDataChange();
+    setStatus(`Imported ${incoming.length} meeting${incoming.length === 1 ? "" : "s"}.`);
+  } catch (e) { setStatus(e.message || "Couldn't read that file.", true); }
+  $("importFile").value = "";
+});
+
+/* ======================================================================
+   Wire up
+   ====================================================================== */
+function refreshAfterDataChange() {
+  if (!profile) return;
+  renderPeople();
+  const openCount = trackerItems(null).filter(isOpen).length;
+  $("checkOpen").disabled = openCount === 0;
+  $("checkOpenLabel").textContent = openCount
+    ? `Check progress on ${openCount} open item${openCount === 1 ? "" : "s"} from earlier meetings`
+    : "After your first meeting, Claude will check which earlier items got done";
+  if (current && !current.isDemo) { const m = Store.get(current.meetingId); if (m) { current.result = m; renderItems(); renderOwners(); } }
+  renderDigest();
+}
+function shareUrl(extra = {}) {
   const p = new URLSearchParams({ type: profile.type, meeting: profile.meeting });
   if (profile.org) p.set("org", profile.org);
   if (profile.focus.length) p.set("focus", profile.focus.join(","));
-  const url = `${location.origin}${location.pathname}?${p}`;
-  if (!(await copyText(url, "Tailored link copied. Anyone who opens it skips setup."))) setStatus(url);
+  if (Sync.on()) p.set("sync", Sync.cfg.url);
+  Object.entries(extra).forEach(([k, v]) => p.set(k, v));
+  return `${baseUrl()}?${p}`;
+}
+
+buildSetup();
+$("saveSetup").addEventListener("click", () => finishSetup(false));
+$("skipSetup").addEventListener("click", () => finishSetup(true));
+$("editSetup").addEventListener("click", showSetup);
+$("run").addEventListener("click", extract);
+$("sample").addEventListener("click", () => { $("notes").value = sampleNotes(); setStatus("Sample notes loaded."); });
+$("demo").addEventListener("click", showDemo);
+$("shareLink").addEventListener("click", async () => {
+  const url = shareUrl();
+  if (!(await copyText(url, `Tailored link copied.${Sync.on() ? " It includes the team sheet; teammates still need the passcode." : " Anyone who opens it skips setup."}`))) setStatus(url);
+});
+$("syncConnect").addEventListener("click", async () => {
+  const url = $("syncUrl").value.trim();
+  if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { setStatus("That doesn't look like a Google Apps Script link. It should start with https://script.google.com/", true); return; }
+  $("syncConnect").disabled = true; setStatus("Connecting to the team sheet…");
+  const ok = await Sync.connect(url, $("syncCode").value);
+  $("syncConnect").disabled = false;
+  setStatus(ok ? "Connected. History is now shared with your team." : `Couldn't connect: ${Sync.lastError}`, !ok);
+});
+$("syncRefresh").addEventListener("click", async () => { setStatus("Refreshing from the team sheet…"); await Sync.pull(); setStatus(Sync.state === "ok" ? "Up to date." : `Couldn't refresh: ${Sync.lastError}`, Sync.state !== "ok"); });
+$("syncDisconnect").addEventListener("click", () => {
+  if (!confirm("Stop syncing with the team sheet? Meetings already saved stay in this browser and in the sheet.")) return;
+  Sync.disconnect(); refreshAfterDataChange(); setStatus("Disconnected. Saving to this browser only.");
 });
 
+/* Start */
+Store.load();
 profile = loadProfile();
+const params = new URLSearchParams(location.search);
 if (profile && ORG_TYPES[profile.type]) {
   profile.focus = Array.isArray(profile.focus) ? profile.focus : [];
   if (!MEETING_TYPES.includes(profile.meeting)) profile.meeting = MEETING_TYPES[0];
+  writeStore(STORE_KEY, profile);
   applyProfile();
+  if (params.get("sync") && !Sync.on()) {
+    $("teamPanel").open = true; $("syncUrl").value = params.get("sync");
+    setStatus("This link connects to your team's shared sheet. Enter the team passcode under \"Team & shared history\".");
+  }
+  if (Sync.on()) Sync.pull();
+  if (params.get("digest")) setTimeout(() => $("digestPanel").scrollIntoView({ block: "start" }), 300);
 } else {
   profile = null;
   showSetup();
 }
+if (location.search) history.replaceState(null, "", location.pathname);
+renderSyncStatus();
 </script>
 </body>
 </html>
