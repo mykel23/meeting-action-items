@@ -288,6 +288,7 @@
           <p>Opens a ready-to-send draft in your email app, translated into each person's language. Translation uses your API key.</p>
           <div id="owners"></div>
           <div class="btns" style="margin-top:12px">
+            <button class="small" id="addRecipient">+ Add someone</button>
             <button class="small" id="emailAll">Email full recap to everyone</button>
           </div>
         </div>
@@ -1198,28 +1199,70 @@ function ownerTasks() {
   current.follow.filter(isOpen).forEach(f => splitOwners(f.owner).forEach(n => add(n, "open", f)));
   return [...map.values()];
 }
-function renderOwners() {
+/* Extra people to email (no tasks of their own): kept on the meeting so they're remembered */
+function extraRecipients() {
+  current.result.extra_recipients = current.result.extra_recipients || [];
+  return current.result.extra_recipients;
+}
+function emailList() {
   const owners = ownerTasks();
-  $("owners").innerHTML = owners.length
-    ? owners.map((o, i) => {
+  const ownerNames = new Set(owners.map(o => o.name.toLowerCase()));
+  const extras = extraRecipients().map((name, xi) => ({ name, items: [], open: [], extra: true, xi }))
+    .filter(x => !x.name || !ownerNames.has(x.name.toLowerCase()));
+  return [...owners, ...extras];
+}
+function renderOwners() {
+  const list = emailList();
+  $("owners").innerHTML = list.length
+    ? list.map((o, i) => {
         const p = Store.findPerson(o.name) || {};
         const count = o.items.length + o.open.length;
+        const nameCell = o.extra
+          ? `<div class="owner-name" style="display:flex; gap:8px; align-items:center">
+               <input type="text" list="peopleList" data-extra-name="${o.xi}" value="${escapeHtml(o.name)}" placeholder="Name" aria-label="Name" style="max-width:220px">
+               <span class="owner-count">gets the recap</span>
+               <button class="x" data-extra-remove="${o.xi}" aria-label="Remove">×</button>
+             </div>`
+          : `<div class="owner-name">${escapeHtml(o.name)} <span class="owner-count">· ${count} task${count > 1 ? "s" : ""}</span></div>`;
+        const dis = o.extra && !o.name ? "disabled" : "";
         return `<div class="owner-row">
-          <div class="owner-name">${escapeHtml(o.name)} <span class="owner-count">· ${count} task${count > 1 ? "s" : ""}</span></div>
-          <input type="email" data-owner-email="${escapeHtml(o.name)}" placeholder="email (optional)" value="${escapeHtml(p.email || "")}" aria-label="${escapeHtml(o.name)} email">
-          <select data-owner-lang="${escapeHtml(o.name)}" aria-label="${escapeHtml(o.name)} language">${langOptions(p.language)}</select>
-          <button class="small" data-email="${i}">Email</button>
+          ${nameCell}
+          <input type="email" data-owner-email="${escapeHtml(o.name)}" placeholder="email${o.extra ? "" : " (optional)"}" value="${escapeHtml(p.email || "")}" aria-label="${escapeHtml(o.name || "New person")} email" ${dis}>
+          <select data-owner-lang="${escapeHtml(o.name)}" aria-label="${escapeHtml(o.name || "New person")} language" ${dis}>${langOptions(p.language)}</select>
+          <button class="small" data-email="${i}" ${dis}>Email</button>
         </div>`;
       }).join("")
-    : '<p class="unassigned" style="margin:0">No tasks have an owner yet.</p>';
+    : '<p class="unassigned" style="margin:0">No tasks have an owner yet. Use "+ Add someone" to email the recap.</p>';
 }
-$("owners").addEventListener("change", (e) => {
-  if (e.target.dataset.ownerEmail) upsertPerson(e.target.dataset.ownerEmail, { email: e.target.value.trim() });
-  if (e.target.dataset.ownerLang) upsertPerson(e.target.dataset.ownerLang, { language: e.target.value });
+$("owners").addEventListener("change", async (e) => {
+  const d = e.target.dataset;
+  if (d.ownerEmail) upsertPerson(d.ownerEmail, { email: e.target.value.trim() });
+  if (d.ownerLang) upsertPerson(d.ownerLang, { language: e.target.value });
+  if (d.extraName !== undefined) {
+    const name = e.target.value.trim();
+    extraRecipients()[Number(d.extraName)] = name;
+    if (name && !Store.findPerson(name)) upsertPerson(name, {});
+    renderOwners(); await persistCurrent();
+    // Jump to the email box for a new person
+    const em = $("owners").querySelector(`input[data-owner-email="${CSS.escape(name)}"]`);
+    if (em && !em.value) em.focus();
+  }
 });
-$("owners").addEventListener("click", (e) => {
-  const i = e.target.dataset.email; if (i === undefined) return;
-  emailOwner(ownerTasks()[Number(i)], e.target);
+$("owners").addEventListener("click", async (e) => {
+  const d = e.target.dataset;
+  if (d.extraRemove !== undefined) {
+    extraRecipients().splice(Number(d.extraRemove), 1);
+    renderOwners(); await persistCurrent(); return;
+  }
+  if (d.email === undefined) return;
+  emailOwner(emailList()[Number(d.email)], e.target);
+});
+$("addRecipient").addEventListener("click", () => {
+  if (!current) return;
+  extraRecipients().push("");
+  renderOwners();
+  const inputs = $("owners").querySelectorAll("input[data-extra-name]");
+  inputs[inputs.length - 1]?.focus();
 });
 
 function openMail(to, subject, body) {
@@ -1248,9 +1291,13 @@ async function translateEmail(email, language) {
   if (!out.subject || !out.body) throw new Error("Translation came back incomplete. Try again.");
   return out;
 }
+function recapEmail(name) {
+  const first = name.split(" ")[0];
+  return { subject: `Recap: ${meetingLabel()}`, body: `Hi ${first},\n\nHere's the recap from the ${meetingLabel()}.\n\n${toPlainRecap()}\n\nThanks!` };
+}
 async function emailOwner(o, btn) {
   const p = Store.findPerson(o.name) || {};
-  let email = ownerEmail(o);
+  let email = (o.items.length || o.open.length) ? ownerEmail(o) : recapEmail(o.name);
   if (p.language && p.language !== "English") {
     btn.disabled = true; setStatus(`Translating ${o.name}'s email into ${p.language}…`);
     try { email = await translateEmail(email, p.language); setStatus(`Opened ${o.name}'s email in ${p.language}.`); }
@@ -1261,7 +1308,7 @@ async function emailOwner(o, btn) {
 }
 $("emailAll").addEventListener("click", () => {
   if (!current) return;
-  const to = [...new Set(ownerTasks().map(o => Store.findPerson(o.name)?.email).concat(Store.lead().map(p => p.email)).filter(Boolean))].join(",");
+  const to = [...new Set(emailList().map(o => Store.findPerson(o.name)?.email).concat(Store.lead().map(p => p.email)).filter(Boolean))].join(",");
   openMail(to, `Recap: ${meetingLabel()}`, toPlainRecap());
 });
 
